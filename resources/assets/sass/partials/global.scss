@@ -1,0 +1,8 @@
+@import "colour-scheme";
+@import "semantic-override";
+
+body {
+  background-color: $color-lightest;
+
+  color: $color-darkest;
+}

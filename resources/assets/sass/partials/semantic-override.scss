@@ -1,0 +1,9 @@
+.ui.button.primary {
+  background-color: $color-mid;
+
+  &:hover,
+  &:focus,
+  &:active {
+    background-color: darken($color-mid, 5%);
+  }
+}
