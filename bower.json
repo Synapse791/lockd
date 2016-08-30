@@ -1,0 +1,25 @@
+{
+  "name": "lockd",
+  "description": "Secure password management for teams and individuals",
+  "main": "",
+  "authors": [
+    "Synapse <synpase791@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "clipboard": "https://github.com/zenorocha/clipboard.js.git",
+    "semantic": "semantic-ui#^2.2.3",
+    "vue": "^1.0.26",
+    "toastr": "^2.1.3",
+    "vue-router": "^0.7.13"
+  }
+}
