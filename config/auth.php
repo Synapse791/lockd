@@ -67,7 +67,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => Lockd\User::class,
+            'model' => Lockd\Models\User::class,
         ],
 
         // 'users' => [
@@ -99,7 +99,7 @@ return [
         'users' => [
             'provider' => 'users',
             'email' => 'auth.emails.password',
-            'table' => 'password_resets',
+            'table' => 'au_password_resets',
             'expire' => 60,
         ],
     ],
