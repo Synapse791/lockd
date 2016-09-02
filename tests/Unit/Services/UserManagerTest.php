@@ -7,7 +7,7 @@ class UserManagerTest extends TestCase
 
     /** @var array */
     private $data;
-    
+
     public function setUp()
     {
         parent::setUp();
@@ -19,8 +19,8 @@ class UserManagerTest extends TestCase
             ->andReturn('letmein');
 
         $this->service = new \Lockd\Services\UserManager($mockHasher);
-        
-        $this->data = [ 
+
+        $this->data = [
             'firstName' => 'Test',
             'lastName' => 'User',
             'email' => 'test@user.com',
@@ -114,5 +114,46 @@ class UserManagerTest extends TestCase
         $this->assertEquals('conflict', $this->service->getError());
         $this->assertEquals(409, $this->service->getErrorCode());
         $this->assertEquals('A user already exists with that email!', $this->service->getErrorDescription());
+    }
+
+    public function testUpdate()
+    {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+
+        $this->seeInDatabase('au_user', [
+            'firstName' => $this->ee['user']->firstName,
+            'lastName' => $this->ee['user']->lastName,
+            'email' => $this->ee['user']->email,
+            'password' => $this->ee['user']->password,
+        ]);
+
+        $result = $this->service->update($this->ee['user'], $this->data);
+
+        $this->assertInstanceOf(\Lockd\Models\User::class, $result);
+
+        $this->seeInDatabase('au_user', $this->data);
+    }
+
+    function testUpdateUntouched()
+    {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+
+        $this->seeInDatabase('au_user', [
+            'firstName' => $this->ee['user']->firstName,
+            'lastName' => $this->ee['user']->lastName,
+            'email' => $this->ee['user']->email,
+            'password' => $this->ee['user']->password,
+        ]);
+
+        $result = $this->service->update($this->ee['user'], []);
+
+        $this->assertInstanceOf(\Lockd\Models\User::class, $result);
+
+        $this->seeInDatabase('au_user', [
+            'firstName' => $this->ee['user']->firstName,
+            'lastName' => $this->ee['user']->lastName,
+            'email' => $this->ee['user']->email,
+            'password' => $this->ee['user']->password,
+        ]);
     }
 }

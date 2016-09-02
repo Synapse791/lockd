@@ -58,4 +58,34 @@ class UserManager extends BaseService
 
         return $user;
     }
+
+    /**
+     * Updates a user's data based on what is provided
+     *
+     * @param User $user
+     * @param array $data
+     * @return bool|User
+     */
+    public function update(User $user, $data = [])
+    {
+        if (empty($data))
+            return $user;
+
+        if (isset($data['firstName']) && !empty($data['firstName']))
+            $user->firstName = $data['firstName'];
+
+        if (isset($data['lastName']) && !empty($data['lastName']))
+            $user->lastName = $data['lastName'];
+
+        if (isset($data['email']) && !empty($data['email']))
+            $user->email = $data['email'];
+
+        if (isset($data['password']) && !empty($data['password']))
+            $user->password = $this->hasher->make($data['password']);
+
+        if (!$this->saveEntity($user))
+            return false;
+
+        return $user;
+    }
 }
