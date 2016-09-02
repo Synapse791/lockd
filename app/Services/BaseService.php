@@ -2,6 +2,7 @@
 
 namespace Lockd\Services;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Class BaseService
@@ -171,6 +172,40 @@ class BaseService
                     ? $this->setConflictError(get_class($entity) . ' already exists')
                     : $this->setConflictError($conflictMessage);
 
+            return $this->setInternalServerError($e->getMessage());
+        }
+    }
+
+    /**
+     * Tries to attach an entity to a relationship
+     *
+     * @param BelongsToMany $relationship
+     * @param Model $entity
+     * @return bool
+     */
+    public function attachEntities(BelongsToMany $relationship, Model $entity)
+    {
+        try {
+            $relationship->attach($entity);
+            return true;
+        } catch (\PDOException $e) {
+            return $this->setInternalServerError($e->getMessage());
+        }
+    }
+
+    /**
+     * Tries to detach an entity to a relationship
+     *
+     * @param BelongsToMany $relationship
+     * @param Model $entity
+     * @return bool
+     */
+    public function detachEntities(BelongsToMany $relationship, Model $entity)
+    {
+        try {
+            $relationship->detach($entity);
+            return true;
+        } catch (\PDOException $e) {
             return $this->setInternalServerError($e->getMessage());
         }
     }

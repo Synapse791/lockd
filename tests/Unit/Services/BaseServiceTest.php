@@ -145,4 +145,72 @@ class BaseServiceTest extends TestCase
         $this->assertEquals(500, $this->service->getErrorCode());
         $this->assertEquals('blah blah blah Something is wrong blah blah blah', $this->service->getErrorDescription());
     }
+
+    public function testAttachEntities()
+    {
+        $mockRelationship = Mockery::mock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
+        $mockEntity = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+
+        $mockRelationship
+            ->shouldReceive('attach')
+            ->with($mockEntity)
+            ->andReturn(true);
+
+        $this->assertTrue(
+            $this->service->attachEntities($mockRelationship, $mockEntity)
+        );
+    }
+
+    public function testAttachEntitiesException()
+    {
+        $mockRelationship = Mockery::mock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
+        $mockEntity = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+
+        $mockRelationship
+            ->shouldReceive('attach')
+            ->with($mockEntity)
+            ->andThrow(\PDOException::class, 'PDO Exception thrown');
+
+        $this->assertFalse(
+            $this->service->attachEntities($mockRelationship, $mockEntity)
+        );
+
+        $this->assertEquals('internal_server_error', $this->service->getError());
+        $this->assertEquals(500, $this->service->getErrorCode());
+        $this->assertEquals('PDO Exception thrown', $this->service->getErrorDescription());
+    }
+
+    public function testDetachEntities()
+    {
+        $mockRelationship = Mockery::mock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
+        $mockEntity = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+
+        $mockRelationship
+            ->shouldReceive('detach')
+            ->with($mockEntity)
+            ->andReturn(true);
+
+        $this->assertTrue(
+            $this->service->detachEntities($mockRelationship, $mockEntity)
+        );
+    }
+
+    public function testDetachEntitiesException()
+    {
+        $mockRelationship = Mockery::mock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
+        $mockEntity = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+
+        $mockRelationship
+            ->shouldReceive('detach')
+            ->with($mockEntity)
+            ->andThrow(\PDOException::class, 'PDO Exception thrown');
+
+        $this->assertFalse(
+            $this->service->detachEntities($mockRelationship, $mockEntity)
+        );
+
+        $this->assertEquals('internal_server_error', $this->service->getError());
+        $this->assertEquals(500, $this->service->getErrorCode());
+        $this->assertEquals('PDO Exception thrown', $this->service->getErrorDescription());
+    }
 }
