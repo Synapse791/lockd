@@ -84,4 +84,65 @@ class BaseServiceTest extends TestCase
         $this->assertEquals(409, $this->service->getErrorCode());
         $this->assertEquals('Conflict Description', $this->service->getErrorDescription());
     }
+
+    public function testSetInternalServerError()
+    {
+        $this->assertFalse($this->service->setInternalServerError('Internal Server Error Description'));
+
+        $this->assertEquals('internal_server_error', $this->service->getError());
+        $this->assertEquals(500, $this->service->getErrorCode());
+        $this->assertEquals('Internal Server Error Description', $this->service->getErrorDescription());
+    }
+
+    public function testSaveEntity()
+    {
+        $mockEntity = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $mockEntity
+            ->shouldReceive('save')
+            ->andReturn(true);
+
+        $this->assertTrue($this->service->saveEntity($mockEntity));
+    }
+
+    public function testSaveEntityDuplicateException()
+    {
+        $mockEntity = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $mockEntity
+            ->shouldReceive('save')
+            ->andThrow(\PDOException::class, 'blah blah blah Duplicate entry blah blah blah');
+
+        $this->assertFalse($this->service->saveEntity($mockEntity));
+
+        $this->assertEquals('conflict', $this->service->getError());
+        $this->assertEquals(409, $this->service->getErrorCode());
+        $this->assertEquals(get_class($mockEntity) . ' already exists', $this->service->getErrorDescription());
+    }
+
+    public function testSaveEntityDuplicateExceptionWithCustomError()
+    {
+        $mockEntity = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $mockEntity
+            ->shouldReceive('save')
+            ->andThrow(\PDOException::class, 'blah blah blah Duplicate entry blah blah blah');
+
+        $this->assertFalse($this->service->saveEntity($mockEntity, 'That entity already exists!'));
+
+        $this->assertEquals('conflict', $this->service->getError());
+        $this->assertEquals(409, $this->service->getErrorCode());
+        $this->assertEquals('That entity already exists!', $this->service->getErrorDescription());
+    }
+
+    public function testSaveEntityCatchAllDatabaseError()
+    {
+        $mockEntity = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $mockEntity
+            ->shouldReceive('save')
+            ->andThrow(\PDOException::class, 'blah blah blah Something is wrong blah blah blah');
+
+        $this->assertFalse($this->service->saveEntity($mockEntity));
+
+        $this->assertEquals('internal_server_error', $this->service->getError());
+        $this->assertEquals(500, $this->service->getErrorCode());
+        $this->assertEquals('blah blah blah Something is wrong blah blah blah', $this->service->getErrorDescription());
+    }
 }

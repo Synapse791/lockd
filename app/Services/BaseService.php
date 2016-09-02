@@ -1,6 +1,7 @@
 <?php
 
 namespace Lockd\Services;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class BaseService
@@ -134,5 +135,43 @@ class BaseService
             ->setErrorDescription($message);
 
         return false;
+    }
+
+    /**
+     * Shortcut to set 500 Internal Server error
+     *
+     * @param string|array $message
+     * @return bool
+     */
+    public function setInternalServerError($message)
+    {
+        $this
+            ->setError('internal_server_error')
+            ->setErrorCode(500)
+            ->setErrorDescription($message);
+
+        return false;
+    }
+
+    /**
+     * Tries to save an entity
+     *
+     * @param Model $entity
+     * @param null $conflictMessage
+     * @return bool
+     */
+    public function saveEntity($entity, $conflictMessage = null)
+    {
+        try {
+            $entity->save();
+            return true;
+        } catch (\PDOException $e) {
+            if (str_contains($e->getMessage(), 'Duplicate entry'))
+                return is_null($conflictMessage)
+                    ? $this->setConflictError(get_class($entity) . ' already exists')
+                    : $this->setConflictError($conflictMessage);
+
+            return $this->setInternalServerError($e->getMessage());
+        }
     }
 }
