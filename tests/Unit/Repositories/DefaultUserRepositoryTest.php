@@ -47,7 +47,7 @@ class DefaultUserRepositoryTest extends TestCase
         unset($results);
     }
 
-    public function testFindNorResults()
+    public function testFindNoResults()
     {
         $this->ee['user1'] = factory(User::class)->create(['firstName' => 'Fred']);
         $this->ee['user2'] = factory(User::class)->create(['firstName' => 'John']);
@@ -62,27 +62,30 @@ class DefaultUserRepositoryTest extends TestCase
         unset($results);
     }
 
-    public function testFindAll()
+    public function testFindNoParameters()
     {
-        $this->ee['user1'] = factory(User::class)->create();
-        $this->ee['user2'] = factory(User::class)->create();
+        $this->ee['user1'] = factory(User::class)->create(['firstName' => 'Fred']);
+        $this->ee['user2'] = factory(User::class)->create(['firstName' => 'John']);
+        $this->ee['user3'] = factory(User::class)->create(['firstName' => 'John']);
+        $this->ee['user4'] = factory(User::class)->create(['firstName' => 'Mike']);
 
-        $results = $this->repository->findAll();
+        $results = $this->repository->find();
 
-        $this->assertCount(2, $results);
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $results);
+        $this->assertCount(4, $results);
 
-        $this->assertInstanceOf(User::class, $results[0]);
-        $this->assertEquals($this->ee['user1']->id, $results[0]->id);
-
-        $this->assertInstanceOf(User::class, $results[1]);
-        $this->assertEquals($this->ee['user2']->id, $results[1]->id);
+        for ($i = 0; $i < 4; $i++) {
+            $this->assertInstanceOf(User::class, $results[$i]);
+            $this->assertEquals($this->ee['user' . ($i + 1)]->id, $results[$i]->id);
+            $this->assertEquals($this->ee['user' . ($i + 1)]->email, $results[$i]->email);
+        }
 
         unset($results);
     }
 
-    public function testFindAllNoResults()
+    public function testFindNoParametersNoResults()
     {
-        $results = $this->repository->findAll();
+        $results = $this->repository->find();
 
         $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $results);
         $this->assertCount(0, $results);

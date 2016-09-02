@@ -13,14 +13,11 @@ use Lockd\Models\User;
  */
 class DefaultUserRepository implements UserRepository
 {
-    public function find(array $parameters)
+    public function find(array $parameters = [])
     {
-        return User::where($parameters)->orderBy('id', 'ASC')->get();
-    }
-
-    public function findAll()
-    {
-        return User::orderBy('id', 'ASC')->get();
+        return empty($parameters)
+            ? User::orderBy('id', 'ASC')->get()
+            : User::where($parameters)->orderBy('id', 'ASC')->get();
     }
 
     public function findOneById($id)

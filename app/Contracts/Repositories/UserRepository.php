@@ -16,14 +16,7 @@ interface UserRepository
      * @param array $parameters
      * @return \Illuminate\Database\Eloquent\Collection|null
      */
-    public function find(array $parameters);
-
-    /**
-     * Find all users
-     *
-     * @return \Illuminate\Database\Eloquent\Collection|null
-     */
-    public function findAll();
+    public function find(array $parameters = []);
 
     /**
      * Find a single user by their ID
