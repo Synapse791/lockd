@@ -151,7 +151,7 @@ return [
         /*
          * Application Service Providers...
          */
-        Lockd\Providers\AppServiceProvider::class,
+        Lockd\Providers\RepositoryServiceProvider::class,
         Lockd\Providers\AuthServiceProvider::class,
         Lockd\Providers\EventServiceProvider::class,
         Lockd\Providers\RouteServiceProvider::class,
