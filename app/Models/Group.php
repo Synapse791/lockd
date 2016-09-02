@@ -1,6 +1,6 @@
 <?php
 
-namespace Lockd\Models\Auth;
+namespace Lockd\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
