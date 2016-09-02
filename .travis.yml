@@ -6,9 +6,23 @@ php:
   - 7.0
   - hhvm
 
+env:
+  - APP_ENV=production
+  - APP_DEBUG=false
+  - APP_KEY=oooooooooTestKeyStringoooooooooo
+  - DB_CONNECTION=mysql
+  - DB_HOST=127.0.0.1
+  - DB_PORT=3306
+  - DB_DATABASE=lockd_tests
+  - DB_USERNAME=root
+  - DB_PASSWORD=""
+
 before_script:
   - composer self-update
   - composer install --prefer-source --no-interaction --dev
+  - mysql -u root -e "DROP DATABASE IF EXISTS lockd_tests;"
+  - mysql -u root -e "CREATE DATABASE IF NOT EXISTS lockd_tests;"
+  - php artisan migrate --refresh
 
 script:
-  - vendor/bin/phpspec run
+  - ./vendor/bin/phpunit

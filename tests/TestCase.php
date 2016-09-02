@@ -3,6 +3,13 @@
 class TestCase extends Illuminate\Foundation\Testing\TestCase
 {
     /**
+     * Extra Entities created during tests
+     *
+     * @var array
+     */
+    protected $ee;
+
+    /**
      * The base URL to use while testing the application.
      *
      * @var string
