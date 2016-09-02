@@ -21,7 +21,7 @@ interface UserRepository
     /**
      * Find a single user by their ID
      *
-     * @param $id
+     * @param int $id
      * @return \Lockd\Models\User|null
      */
     public function findOneById($id);
@@ -29,7 +29,7 @@ interface UserRepository
     /**
      * Find a single user by their email
      *
-     * @param $email
+     * @param string $email
      * @return \Lockd\Models\User|null
      */
     public function findOneByEmail($email);
