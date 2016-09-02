@@ -12,6 +12,6 @@ before_script:
   - composer install --prefer-source --no-interaction --dev
   - mysql -u root -e "DROP DATABASE IF EXISTS lockd_tests;"
   - mysql -u root -e "CREATE DATABASE IF NOT EXISTS lockd_tests;"
-  - php artisan migrate --refresh
+  - php artisan migrate
 
 script: vendor/bin/phpunit
