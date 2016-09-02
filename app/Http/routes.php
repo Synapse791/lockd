@@ -19,10 +19,12 @@ Route::group(['prefix' => '/api', 'namespace' => 'Api'], function () {
 
     Route::group(['prefix' => '/user'], function () {
         Route::get('/', 'UserController@get');
+        Route::put('/', 'UserController@create');
     });
 
     Route::group(['prefix' => '/group'], function () {
         Route::get('/', 'GroupController@get');
+        Route::put('/', 'GroupController@create');
     });
 
 });

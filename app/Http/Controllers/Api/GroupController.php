@@ -5,6 +5,7 @@ namespace Lockd\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Factory;
 use Lockd\Contracts\Repositories\GroupRepository;
+use Lockd\Services\GroupManager;
 
 /**
  * Class GroupController
@@ -15,16 +16,21 @@ use Lockd\Contracts\Repositories\GroupRepository;
 class GroupController extends BaseApiController
 {
     /** @var GroupRepository */
-    private $groupRepository;
+    private $repository;
+
+    /** @var GroupManager */
+    private $manager;
 
     /**
      * GroupController constructor
      *
      * @param GroupRepository $userRepository
+     * @param GroupManager $groupManager
      */
-    public function __construct(GroupRepository $userRepository)
+    public function __construct(GroupRepository $userRepository, GroupManager $groupManager)
     {
-        $this->groupRepository = $userRepository;
+        $this->repository = $userRepository;
+        $this->manager = $groupManager;
     }
 
     /**
@@ -45,15 +51,38 @@ class GroupController extends BaseApiController
             return $this->jsonValidationBadRequest($validation);
 
         if ($request->query('id', false))
-            $response = $this->groupRepository->findOneById($request->query('id'));
+            $response = $this->repository->findOneById($request->query('id'));
         else if ($request->query('name', false))
-            $response = $this->groupRepository->findOneByName($request->query('name'));
+            $response = $this->repository->findOneByName($request->query('name'));
         else
-            $response = $this->groupRepository->find();
+            $response = $this->repository->find();
 
         if (!$response)
             return $this->jsonNotFound('Group not found');
 
         return $this->jsonResponse($response);
+    }
+
+    /**
+     * Creates a new Group
+     *
+     * @param Factory $validationFactory
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function create(Factory $validationFactory, Request $request)
+    {
+        // TODO Tests
+        $validation = $validationFactory->make($request->input(), [
+            'name' => 'required|string',
+        ]);
+
+        if ($validation->fails())
+            return $this->jsonValidationBadRequest($validation);
+
+        if (!$this->manager->create($request->input('name')))
+            return $this->jsonResponseFromService($this->manager);
+
+        return $this->jsonResponse('Group created successfully', 201);
     }
 }

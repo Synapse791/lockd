@@ -5,6 +5,7 @@ namespace Lockd\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Factory;
 use Lockd\Contracts\Repositories\UserRepository;
+use Lockd\Services\UserManager;
 
 /**
  * Class UserController
@@ -15,16 +16,21 @@ use Lockd\Contracts\Repositories\UserRepository;
 class UserController extends BaseApiController
 {
     /** @var UserRepository */
-    private $userRepository;
+    private $repository;
+
+    /** @var UserManager */
+    private $manager;
 
     /**
      * UserController constructor
      *
      * @param UserRepository $userRepository
+     * @param UserManager $userManager
      */
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository, UserManager $userManager)
     {
-        $this->userRepository = $userRepository;
+        $this->repository = $userRepository;
+        $this->manager = $userManager;
     }
 
     /**
@@ -45,15 +51,46 @@ class UserController extends BaseApiController
             return $this->jsonValidationBadRequest($validation);
 
         if ($request->query('id', false))
-            $response = $this->userRepository->findOneById($request->query('id'));
+            $response = $this->repository->findOneById($request->query('id'));
         else if ($request->query('email', false))
-            $response = $this->userRepository->findOneByEmail($request->query('email'));
+            $response = $this->repository->findOneByEmail($request->query('email'));
         else
-            $response = $this->userRepository->find();
+            $response = $this->repository->find();
 
         if (!$response)
             return $this->jsonNotFound('User not found');
 
         return $this->jsonResponse($response);
+    }
+
+    /**
+     * Create a new User
+     *
+     * @param Factory $validationFactory
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function create(Factory $validationFactory, Request $request)
+    {
+        // TODO Tests!
+        $validation = $validationFactory->make($request->input(), [
+            'firstName' => 'required|string',
+            'lastName' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        if ($validation->fails())
+            return $this->jsonValidationBadRequest($validation);
+
+        if (!$this->manager->create(
+            $request->input('firstName'),
+            $request->input('lastName'),
+            $request->input('email'),
+            $request->input('password')
+        ))
+            return $this->jsonResponseFromService($this->manager);
+
+        return $this->jsonResponse('User created successfully', 201);
     }
 }
