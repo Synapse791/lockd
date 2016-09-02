@@ -24,5 +24,4 @@ before_script:
   - mysql -u root -e "CREATE DATABASE IF NOT EXISTS lockd_tests;"
   - php artisan migrate --refresh
 
-script:
-  - ./vendor/bin/phpunit
+script: vendor/bin/phpunit
