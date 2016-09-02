@@ -87,4 +87,46 @@ class GroupManagerTest extends TestCase
             'name' => $this->ee['group']->name,
         ]);
     }
+
+    public function testAddUserToGroup()
+    {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
+        $this->dontSeeInDatabase('au_user_groups', [
+            'user_id' => $this->ee['user']->id,
+            'group_id' => $this->ee['group']->id,
+        ]);
+
+        $this->assertTrue(
+            $this->service->attachEntities($this->ee['group']->users(), $this->ee['user'])
+        );
+
+        $this->seeInDatabase('au_user_groups', [
+            'user_id' => $this->ee['user']->id,
+            'group_id' => $this->ee['group']->id,
+        ]);
+    }
+
+    public function testRemoveUserFromGroup()
+    {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
+        $this->ee['group']->users()->attach($this->ee['user']);
+
+        $this->seeInDatabase('au_user_groups', [
+            'user_id' => $this->ee['user']->id,
+            'group_id' => $this->ee['group']->id,
+        ]);
+
+        $this->assertTrue(
+            $this->service->detachEntities($this->ee['group']->users(), $this->ee['user'])
+        );
+
+        $this->dontSeeInDatabase('au_user_groups', [
+            'user_id' => $this->ee['user']->id,
+            'group_id' => $this->ee['group']->id,
+        ]);
+    }
 }

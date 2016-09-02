@@ -2,6 +2,7 @@
 
 namespace Lockd\Services;
 use Lockd\Models\Group;
+use Lockd\Models\User;
 
 /**
  * Class GroupManager
@@ -51,5 +52,29 @@ class GroupManager extends BaseService
             return false;
 
         return $group;
+    }
+
+    /**
+     * Adds the provided user to the provided group
+     *
+     * @param User $user
+     * @param Group $group
+     * @return bool
+     */
+    public function addUserToGroup(User $user, Group $group)
+    {
+         return $this->attachEntities($group->users(), $user);
+    }
+
+    /**
+     * Removes the provided user from the provided group
+     *
+     * @param User $user
+     * @param Group $group
+     * @return bool
+     */
+    public function removeUserFromGroup(User $user, Group $group)
+    {
+        return $this->detachEntities($group->users(), $user);
     }
 }
