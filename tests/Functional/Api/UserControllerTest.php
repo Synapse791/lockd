@@ -143,4 +143,63 @@ class UserControllerTest extends FunctionalTestCase
 
         $this->dontSeeInDatabase('au_user', $data);
     }
+
+    public function testUpdate()
+    {
+        $data = [
+            'firstName' => 'Update',
+            'lastName' => 'Test',
+            'email' => 'update@test.com',
+            'password' => 'letmein',
+            'password_confirmation' => 'letmein',
+        ];
+
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+
+        $this->seeInDatabase('au_user', [
+            'firstName' => $this->ee['user']->firstName,
+            'lastName' => $this->ee['user']->lastName,
+            'email' => $this->ee['user']->email,
+            'password' => $this->ee['user']->password,
+        ]);
+
+        $this
+            ->patch('/api/user/' . $this->ee['user']->id, $data)
+            ->seeStatusCode(200)
+            ->seeJson([
+                'data' => 'User updated successfully',
+            ]);
+
+        $this->dontSeeInDatabase('au_user', ['password' => $data['password']]);
+
+        unset($data['password']);
+        unset($data['password_confirmation']);
+
+        $this->seeInDatabase('au_user', $data);
+    }
+
+    public function testUpdateBadRequest()
+    {
+        $this
+            ->patch('/api/user/1', [
+                'password' => 'letmein',
+                'password_confirmation' => 'keepmeout',
+            ])
+            ->seeStatusCode(400)
+            ->seeJson([
+                'error' => 'bad_request',
+                'errorDescription' => ['The password confirmation does not match.'],
+            ]);
+    }
+
+    public function testUpdateUserNotFound()
+    {
+        $this
+            ->patch('/api/user/1000')
+            ->seeStatusCode(404)
+            ->seeJson([
+                'error' => 'not_found',
+                'errorDescription' => 'User with ID 1000 not found'
+            ]);
+    }
 }

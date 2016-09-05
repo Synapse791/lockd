@@ -24,6 +24,7 @@ Route::group([
     Route::group(['prefix' => '/user'], function () {
         Route::get('/', 'UserController@get');
         Route::put('/', 'UserController@create');
+        Route::patch('/{id}', 'UserController@update');
     });
 
     Route::group(['prefix' => '/group'], function () {

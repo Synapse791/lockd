@@ -92,4 +92,35 @@ class UserController extends BaseApiController
 
         return $this->jsonResponse('User created successfully', 201);
     }
+
+    /**
+     * Updates a User's details
+     *
+     * @param Factory $validationFactory
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Factory $validationFactory, Request $request, $id)
+    {
+        $validation = $validationFactory->make($request->input(), [
+            'firstName' => 'string',
+            'lastName' => 'string',
+            'email' => 'email',
+            'password' => 'min:6|confirmed',
+        ]);
+
+        if ($validation->fails())
+            return $this->jsonValidationBadRequest($validation);
+
+        $user = $this->repository->findOneById($id);
+
+        if (!$user)
+            return $this->jsonNotFound("User with ID {$id} not found");
+
+        if (!$this->manager->update($user, $request->all()))
+            return $this->jsonResponseFromService($this->manager);
+
+        return $this->jsonResponse('User updated successfully', 200);
+    }
 }
