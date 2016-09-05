@@ -32,6 +32,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            \Lockd\Http\Middleware\ApiAuthenticate::class,
             'throttle:60,1',
         ],
     ];

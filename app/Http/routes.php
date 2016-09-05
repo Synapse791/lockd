@@ -15,7 +15,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::group(['prefix' => '/api', 'namespace' => 'Api'], function () {
+Route::group([
+    'prefix' => '/api',
+    'namespace' => 'Api',
+    'middleware' => ['api'],
+], function () {
 
     Route::group(['prefix' => '/user'], function () {
         Route::get('/', 'UserController@get');
