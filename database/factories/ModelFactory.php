@@ -33,3 +33,13 @@ $factory->define(\Lockd\Models\Folder::class, function (Faker\Generator $faker) 
         'parent_id' => 0,
     ];
 });
+
+$factory->define(\Lockd\Models\Password::class, function (Faker\Generator $faker) {
+    return [
+        'folder_id' => 0,
+        'name' => $faker->firstName,
+        'url' => $faker->url,
+        'user' => $faker->userName,
+        'password' => 'letmein',
+    ];
+});
