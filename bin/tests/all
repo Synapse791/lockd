@@ -13,6 +13,10 @@ cp .env.tests .env || { resetConfig 1; }
 
 sed -i 's/DB_PASSWORD=""/DB_PASSWORD=letmein/g' .env
 
-./vendor/bin/phpunit || { resetConfig 1; }
+echo -e "\e[01mUnit Tests:\e[00m"
+./vendor/bin/phpunit --testsuite "Unit Test Suite" || { resetConfig 1; }
+
+echo -e "\e[01mFunction Tests:\e[00m"
+./vendor/bin/phpunit --testsuite "Functional Test Suite" || { resetConfig 1; }
 
 resetConfig 0
