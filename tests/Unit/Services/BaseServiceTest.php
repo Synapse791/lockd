@@ -146,6 +146,71 @@ class BaseServiceTest extends TestCase
         $this->assertEquals('blah blah blah Something is wrong blah blah blah', $this->service->getErrorDescription());
     }
 
+    public function testAssociateEntities()
+    {
+        $mockRelationship = Mockery::mock(\Illuminate\Database\Eloquent\Relations\BelongsTo::class);
+        $mockEntity = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+
+        $mockRelationship
+            ->shouldReceive('associate')
+            ->with($mockEntity)
+            ->andReturn(true);
+
+        $this->assertTrue(
+            $this->service->associateEntities($mockRelationship, $mockEntity)
+        );
+    }
+
+    public function testAssociateEntitiesException()
+    {
+        $mockRelationship = Mockery::mock(\Illuminate\Database\Eloquent\Relations\BelongsTo::class);
+        $mockEntity = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+
+        $mockRelationship
+            ->shouldReceive('associate')
+            ->with($mockEntity)
+            ->andThrow(\PDOException::class, 'PDO Exception thrown');
+
+        $this->assertFalse(
+            $this->service->associateEntities($mockRelationship, $mockEntity)
+        );
+
+        $this->assertEquals('internal_server_error', $this->service->getError());
+        $this->assertEquals(500, $this->service->getErrorCode());
+        $this->assertEquals('PDO Exception thrown', $this->service->getErrorDescription());
+    }
+
+    public function testDissociateEntities()
+    {
+        $mockRelationship = Mockery::mock(\Illuminate\Database\Eloquent\Relations\BelongsTo::class);
+
+        $mockRelationship
+            ->shouldReceive('dissociate')
+            ->andReturn(true);
+
+        $this->assertTrue(
+            $this->service->dissociateEntities($mockRelationship)
+        );
+    }
+
+    public function testDissociateEntitiesException()
+    {
+        $mockRelationship = Mockery::mock(\Illuminate\Database\Eloquent\Relations\BelongsTo::class);
+
+
+        $mockRelationship
+            ->shouldReceive('dissociate')
+            ->andThrow(\PDOException::class, 'PDO Exception thrown');
+
+        $this->assertFalse(
+            $this->service->dissociateEntities($mockRelationship)
+        );
+
+        $this->assertEquals('internal_server_error', $this->service->getError());
+        $this->assertEquals(500, $this->service->getErrorCode());
+        $this->assertEquals('PDO Exception thrown', $this->service->getErrorDescription());
+    }
+
     public function testAttachEntities()
     {
         $mockRelationship = Mockery::mock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
