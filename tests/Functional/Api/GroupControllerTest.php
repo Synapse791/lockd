@@ -1,16 +1,7 @@
 <?php
 
-class GroupControllerTest extends TestCase
+class GroupControllerTest extends FunctionalTestCase
 {
-    public function tearDown()
-    {
-        if (count($this->ee) > 0)
-            foreach ($this->ee as $entity)
-                $entity->delete();
-
-        parent::tearDown();
-    }
-
     public function testGetAllGroups()
     {
         $this->ee['group1'] = factory(\Lockd\Models\Group::class)->create();
@@ -69,6 +60,46 @@ class GroupControllerTest extends TestCase
                     'id' => $this->ee['group2']->id,
                     'name' => $this->ee['group2']->name,
                 ]
+            ]);
+    }
+
+    public function testCreate()
+    {
+        $this
+            ->put('/api/group', ['name' => 'Finance'])
+            ->assertResponseStatus(201)
+            ->seeJson([
+                'data' => 'Group created successfully',
+            ]);
+
+        $this->seeInDatabase('au_group', ['name' => 'Finance']);
+
+        $this->ee['group'] = \Lockd\Models\Group::where('name', 'Finance')->first();
+    }
+
+    public function testCreateBadRequest()
+    {
+        $this
+            ->put('/api/group', [])
+            ->assertResponseStatus(400)
+            ->seeJson([
+                'error' => 'bad_request',
+                'errorDescription' => ["The name field is required."],
+            ]);
+
+        $this->dontSeeInDatabase('au_group', ['name' => 'Finance']);
+    }
+
+    public function testCreateConflict()
+    {
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
+        $this
+            ->put('/api/group', ['name' => $this->ee['group']->name])
+            ->assertResponseStatus(409)
+            ->seeJson([
+                'error' => 'conflict',
+                'errorDescription' => 'A group already exists with that name!',
             ]);
     }
 }

@@ -72,7 +72,6 @@ class GroupController extends BaseApiController
      */
     public function create(Factory $validationFactory, Request $request)
     {
-        // TODO Tests
         $validation = $validationFactory->make($request->input(), [
             'name' => 'required|string',
         ]);

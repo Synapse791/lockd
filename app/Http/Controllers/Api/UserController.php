@@ -72,7 +72,6 @@ class UserController extends BaseApiController
      */
     public function create(Factory $validationFactory, Request $request)
     {
-        // TODO Tests!
         $validation = $validationFactory->make($request->input(), [
             'firstName' => 'required|string',
             'lastName' => 'required|string',

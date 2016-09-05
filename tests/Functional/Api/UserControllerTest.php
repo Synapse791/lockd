@@ -1,16 +1,7 @@
 <?php
 
-class UserControllerTest extends TestCase
+class UserControllerTest extends FunctionalTestCase
 {
-    public function tearDown()
-    {
-        if (count($this->ee) > 0)
-            foreach ($this->ee as $entity)
-                $entity->delete();
-
-        parent::tearDown();
-    }
-
     public function testGetAllUsers()
     {
         $this->ee['user1'] = factory(\Lockd\Models\User::class)->create();
@@ -81,5 +72,75 @@ class UserControllerTest extends TestCase
                     'updated_at' => $this->ee['user2']->updated_at->format('Y-m-d H:i:s'),
                 ]
             ]);
+    }
+
+    public function testCreate()
+    {
+        $data = [
+            'firstName' => 'Test',
+            'lastName' => 'User',
+            'email' => 'test@user.com',
+            'password' => 'letmein',
+            'password_confirmation' => 'letmein',
+        ];
+
+        $this
+            ->put('/api/user', $data)
+            ->assertResponseStatus(201)
+            ->seeJson([
+                'data' => 'User created successfully',
+            ]);
+
+        unset($data['password']);
+        unset($data['password_confirmation']);
+
+        $this->seeInDatabase('au_user', $data);
+
+        $user = \Lockd\Models\User::where('email', 'test@user.com')->first();
+
+        if ($user)
+            $this->ee['user'] = $user;
+    }
+
+    public function testCreateBadRequest()
+    {
+        $this
+            ->put('/api/user', [])
+            ->assertResponseStatus(400)
+            ->seeJson([
+                'error' => 'bad_request',
+                'errorDescription' => [
+                    'The email field is required.',
+                    'The first name field is required.',
+                    'The last name field is required.',
+                    'The password field is required.'
+                ],
+            ]);
+    }
+
+    public function testCreateConflict()
+    {
+        $data = [
+            'firstName' => 'Test',
+            'lastName' => 'User',
+            'email' => 'test@user.com',
+            'password' => 'letmein',
+            'password_confirmation' => 'letmein',
+        ];
+
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create(['email' => $data['email']]);
+
+        $this
+            ->put('/api/user', $data)
+            ->assertResponseStatus(409)
+            ->seeJson([
+                'error' => 'conflict',
+                'errorDescription' => 'A user already exists with that email!',
+            ]);
+
+        unset($data['password']);
+        unset($data['password_confirmation']);
+
+        $this->dontSeeInDatabase('au_user', $data);
     }
 }
