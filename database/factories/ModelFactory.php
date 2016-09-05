@@ -26,3 +26,10 @@ $factory->define(\Lockd\Models\Group::class, function (Faker\Generator $faker) {
         'name' => $faker->firstName,
     ];
 });
+
+$factory->define(\Lockd\Models\Folder::class, function (Faker\Generator $faker) {
+    return [
+        'name' => $faker->firstName,
+        'parent_id' => 0,
+    ];
+});
