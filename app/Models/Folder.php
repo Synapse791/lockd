@@ -47,4 +47,14 @@ class Folder extends Model
     {
         return $this->hasMany(Password::class, 'folder_id');
     }
+
+    /**
+     * Relationship for the Groups
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'au_group_folders');
+    }
 }
