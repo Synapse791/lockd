@@ -102,4 +102,47 @@ class GroupControllerTest extends FunctionalTestCase
                 'errorDescription' => 'A group already exists with that name!',
             ]);
     }
+
+    public function testUpdate()
+    {
+        $data = ['name' => 'Finance'];
+
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
+        $this->seeInDatabase('au_group', [
+            'name' => $this->ee['group']->name,
+        ]);
+
+        $this
+            ->patch('/api/group/' . $this->ee['group']->id, $data)
+            ->seeStatusCode(200)
+            ->seeJson([
+                'data' => 'Group updated successfully'
+            ]);
+
+        $this->seeInDatabase('au_group', $data);
+        $this->dontSeeInDatabase('au_group', ['name' => $this->ee['group']->name]);
+    }
+
+    public function testUpdateBadRequest()
+    {
+        $this
+            ->patch('/api/group/1', [])
+            ->seeStatusCode(400)
+            ->seeJson([
+                'error' => 'bad_request',
+                'errorDescription' => ['The name field is required.']
+            ]);
+    }
+
+    public function testUpdateGroupNotFound()
+    {
+        $this
+            ->patch('/api/group/1000', ['name' => 'Update Test'])
+            ->seeStatusCode(404)
+            ->seeJson([
+                'error' => 'not_found',
+                'errorDescription' => 'Group with ID 1000 not found'
+            ]);
+    }
 }

@@ -84,4 +84,32 @@ class GroupController extends BaseApiController
 
         return $this->jsonResponse('Group created successfully', 201);
     }
+
+    /**
+     * Updates a Group's details
+     *
+     * @param Factory $validationFactory
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Factory $validationFactory, Request $request, $id)
+    {
+        $validation = $validationFactory->make($request->input(), [
+            'name' => 'required|string',
+        ]);
+
+        if ($validation->fails())
+            return $this->jsonValidationBadRequest($validation);
+
+        $group = $this->repository->findOneById($id);
+
+        if (!$group)
+            return $this->jsonNotFound("Group with ID {$id} not found");
+
+        if (!$this->manager->update($group, $request->all()))
+            return $this->jsonResponseFromService($this->manager);
+
+        return $this->jsonResponse('Group updated successfully', 200);
+    }
 }

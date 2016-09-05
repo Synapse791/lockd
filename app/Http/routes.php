@@ -30,6 +30,7 @@ Route::group([
     Route::group(['prefix' => '/group'], function () {
         Route::get('/', 'GroupController@get');
         Route::put('/', 'GroupController@create');
+        Route::patch('/{id}', 'GroupController@update');
     });
 
 });
