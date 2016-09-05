@@ -1,0 +1,18 @@
+#!/bin/bash
+
+resetConfig() {
+  mv .env.bak .env
+  exit $1
+}
+
+if [ -f .env ]; then
+  cp .env .env.bak
+fi
+
+cp .env.tests .env || { resetConfig 1; }
+
+sed -i 's/DB_PASSWORD=""/DB_PASSWORD=letmein/g' .env
+
+./vendor/bin/phpunit || { resetConfig 1; }
+
+resetConfig 0

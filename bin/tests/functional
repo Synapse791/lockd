@@ -13,9 +13,6 @@ cp .env.tests .env || { resetConfig 1; }
 
 sed -i 's/DB_PASSWORD=""/DB_PASSWORD=letmein/g' .env
 
-php artisan migrate:refresh || { resetConfig 1; }
-
-./vendor/bin/phpunit --testsuite "Unit Test Suite" || { resetConfig 1; }
 ./vendor/bin/phpunit --testsuite "Functional Test Suite" || { resetConfig 1; }
 
 resetConfig 0
