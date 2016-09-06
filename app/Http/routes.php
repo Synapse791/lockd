@@ -33,4 +33,18 @@ Route::group([
         Route::patch('/{id}', 'GroupController@update');
     });
 
+    Route::group(['prefix' => '/folder'], function () {
+
+        Route::get('/{id}/{option?}', 'FolderController@get')
+            ->where([
+                'id' => '^[0-9]+$',
+                'option' => '^(folders|parent)$',
+            ]);
+
+        Route::put('/', 'FolderController@create');
+
+        Route::patch('/{id}', 'FolderController@update');
+
+    });
+
 });
