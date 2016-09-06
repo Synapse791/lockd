@@ -45,6 +45,12 @@ Route::group([
 
         Route::patch('/{id}', 'FolderController@update');
 
+        Route::group(['prefix' => '/{id}/passwords'], function() {
+
+            Route::get('/', 'PasswordController@getFromFolder');
+
+        });
+
     });
 
 });
