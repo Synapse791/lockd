@@ -14,25 +14,25 @@ use Lockd\Models\Group;
 class PermissionManager extends BaseService
 {
     /**
-     * Adds a folder to a group
+     * Grant access for a group to a folder
      *
      * @param Folder $folder
      * @param Group $group
      * @return bool
      */
-    public function addFolderToGroup(Folder $folder, Group $group)
+    public function grantGroupAccessToFolder(Group $group, Folder $folder)
     {
         return $this->attachEntities($group->folders(), $folder);
     }
 
     /**
-     * Removes a folder from a group
+     * Removes access for a group from a folder
      *
-     * @param Folder $folder
      * @param Group $group
+     * @param Folder $folder
      * @return bool
      */
-    public function removeFolderFromGroup(Folder $folder, Group $group)
+    public function removeGroupAccessFromFolder(Group $group, Folder $folder)
     {
         return $this->detachEntities($group->folders(), $folder);
     }
