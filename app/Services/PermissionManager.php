@@ -22,7 +22,13 @@ class PermissionManager extends BaseService
      */
     public function grantGroupAccessToFolder(Group $group, Folder $folder)
     {
-        return $this->attachEntities($group->folders(), $folder);
+        if (!$this->attachEntities($group->folders(), $folder)) {
+            if (str_contains($this->getErrorDescription(), 'Duplicate entry'))
+                return true;
+            return false;
+        }
+
+        return true;
     }
 
     /**
