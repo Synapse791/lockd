@@ -30,10 +30,6 @@ class UserManagerTest extends TestCase
 
     public function tearDown()
     {
-        if (count($this->ee) > 0)
-            foreach ($this->ee as $entity)
-                $entity->delete();
-
         unset($this->service);
         unset($this->data);
         parent::tearDown();

@@ -16,6 +16,18 @@ class TestCase extends Illuminate\Foundation\Testing\TestCase
      */
     protected $baseUrl = 'http://localhost';
 
+    public function tearDown()
+    {
+        if (count($this->ee) > 0)
+            foreach ($this->ee as $entity)
+                if (is_object($entity))
+                    $entity->delete();
+                else
+                    unset($entity);
+
+        parent::tearDown();
+    }
+
     /**
      * Creates the application.
      *
