@@ -7,6 +7,12 @@ use Illuminate\Validation\Factory;
 use Lockd\Contracts\Repositories\FolderRepository;
 use Lockd\Services\FolderManager;
 
+/**
+ * Class FolderController
+ *
+ * @package Lockd\Http\Controllers\Api
+ * @author Iain Earl <synapse791@gmail.com>
+ */
 class FolderController extends BaseApiController
 {
     /** @var FolderRepository */
