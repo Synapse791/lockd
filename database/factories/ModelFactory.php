@@ -40,6 +40,6 @@ $factory->define(\Lockd\Models\Password::class, function (Faker\Generator $faker
         'name' => $faker->firstName,
         'url' => $faker->url,
         'user' => $faker->userName,
-        'password' => 'letmein',
+        'password' => Crypt::encrypt('letmein'),
     ];
 });

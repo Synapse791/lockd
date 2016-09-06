@@ -16,13 +16,11 @@ class PasswordManagerTest extends TestCase
         $mockEncrypter = Mockery::mock(\Illuminate\Encryption\Encrypter::class);
         $mockEncrypter
             ->shouldReceive('encrypt')
-            ->with('letmein')
             ->atMost(1)
             ->andReturn($this->encryptedString);
 
         $mockEncrypter
             ->shouldReceive('decrypt')
-            ->with('letmein')
             ->atMost(1)
             ->andReturn($this->decryptedString);
 
