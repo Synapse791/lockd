@@ -37,12 +37,12 @@ interface PasswordRepository
     public function findPasswordsInFolder(Folder $folder);
 
     /**
-     * Finds the parent folder of the provided password
+     * Finds the folder (parent) of the provided password
      *
      * @param Password $password
      * @return Folder|null
      */
-    public function findParent(Password $password);
+    public function findFolder(Password $password);
 
     /**
      * Counts all the passwords
