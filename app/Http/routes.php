@@ -48,6 +48,7 @@ Route::group([
         Route::group(['prefix' => '/{id}/passwords'], function() {
 
             Route::get('/', 'PasswordController@getFromFolder');
+            Route::put('/', 'PasswordController@create');
 
         });
 
