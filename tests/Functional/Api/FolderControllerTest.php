@@ -13,7 +13,6 @@ class FolderControllerTest extends FunctionalTestCase
             ->seeJson([
                 'id' => $this->ee['folder2']->id,
                 'name' => $this->ee['folder2']->name,
-                'parent_id' => "0",
             ]);
     }
 
@@ -35,12 +34,10 @@ class FolderControllerTest extends FunctionalTestCase
             ->seeJson([
                 'id' => $this->ee['folder2']->id,
                 'name' => $this->ee['folder2']->name,
-                'parent_id' => "{$this->ee['folder1']->id}",
             ])
             ->seeJson([
                 'id' => $this->ee['folder3']->id,
                 'name' => $this->ee['folder3']->name,
-                'parent_id' => "{$this->ee['folder1']->id}",
             ]);
     }
 
@@ -58,7 +55,6 @@ class FolderControllerTest extends FunctionalTestCase
             ->seeJson([
                 'id' => $this->ee['folder1']->id,
                 'name' => $this->ee['folder1']->name,
-                'parent_id' => "0",
             ]);
     }
 
