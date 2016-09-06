@@ -78,28 +78,4 @@ class GroupManager extends BaseService
     {
         return $this->detachEntities($group->users(), $user);
     }
-
-    /**
-     * Adds a folder to a group
-     *
-     * @param Folder $folder
-     * @param Group $group
-     * @return bool
-     */
-    public function addFolderToGroup(Folder $folder, Group $group)
-    {
-        return $this->attachEntities($group->folders(), $folder);
-    }
-
-    /**
-     * Removes a folder from a group
-     *
-     * @param Folder $folder
-     * @param Group $group
-     * @return bool
-     */
-    public function removeFolderFromGroup(Folder $folder, Group $group)
-    {
-        return $this->detachEntities($group->folders(), $folder);
-    }
 }
