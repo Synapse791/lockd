@@ -24,7 +24,9 @@ class PasswordManagerTest extends TestCase
             ->atMost(1)
             ->andReturn($this->decryptedString);
 
-        $this->service = new \Lockd\Services\PasswordManager($mockEncrypter);
+        $mockRepository = Mockery::mock(\Lockd\Repositories\DefaultPasswordRepository::class);
+
+        $this->service = new \Lockd\Services\PasswordManager($mockEncrypter, $mockRepository);
 
         $this->ee['rootFolder'] = factory(\Lockd\Models\Folder::class)->create([
             'name' => 'Root',
@@ -40,6 +42,20 @@ class PasswordManagerTest extends TestCase
 
     public function testCreate()
     {
+        $mockEncrypter = Mockery::mock(\Illuminate\Encryption\Encrypter::class);
+        $mockEncrypter
+            ->shouldReceive('encrypt')
+            ->atMost(1)
+            ->andReturn($this->encryptedString);
+
+        $mockRepository = Mockery::mock(\Lockd\Repositories\DefaultPasswordRepository::class);
+        $mockRepository
+            ->shouldReceive('find')
+            ->andReturn([]);
+
+        $this->service = new \Lockd\Services\PasswordManager($mockEncrypter, $mockRepository);
+
+
         $data = [
             'folder_id' => $this->ee['rootFolder']->id,
             'name' => 'Test Password',
@@ -76,6 +92,34 @@ class PasswordManagerTest extends TestCase
         $this->assertEquals('bad_request', $this->service->getError());
         $this->assertEquals(400, $this->service->getErrorCode());
         $this->assertEquals(['Please provide a name', 'Please provide a password'], $this->service->getErrorDescription());
+    }
+
+    public function testCreateConflict()
+    {
+        $mockEncrypter = Mockery::mock(\Illuminate\Encryption\Encrypter::class);
+        $mockRepository = Mockery::mock(\Lockd\Repositories\DefaultPasswordRepository::class);
+        $mockRepository
+            ->shouldReceive('find')
+            ->andReturn(['result']);
+
+        $this->service = new \Lockd\Services\PasswordManager($mockEncrypter, $mockRepository);
+
+        $this->ee['password'] = factory(\Lockd\Models\Password::class)->create([
+            'name' => 'TestPassword',
+            'folder_id' => $this->ee['rootFolder']->id,
+        ]);
+
+        $this->assertFalse(
+            $this->service->create(
+                $this->ee['rootFolder'],
+                'TestPassword',
+                'letmein'
+            )
+        );
+
+        $this->assertEquals('conflict', $this->service->getError());
+        $this->assertEquals(409, $this->service->getErrorCode());
+        $this->assertEquals('A password with that name already exists in this folder', $this->service->getErrorDescription());
     }
 
     public function testUpdate()

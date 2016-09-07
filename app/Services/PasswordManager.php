@@ -3,6 +3,7 @@
 namespace Lockd\Services;
 
 use Illuminate\Contracts\Encryption\Encrypter;
+use Lockd\Contracts\Repositories\PasswordRepository;
 use Lockd\Models\Folder;
 use Lockd\Models\Password;
 
@@ -17,14 +18,19 @@ class PasswordManager extends BaseService
     /** @var Encrypter */
     private $encrypter;
 
+    /** @var PasswordRepository */
+    private $repository;
+
     /**
      * PasswordManager constructor
      *
      * @param Encrypter $encrypter
+     * @param PasswordRepository $repository
      */
-    public function __construct(Encrypter $encrypter)
+    public function __construct(Encrypter $encrypter, PasswordRepository $repository)
     {
         $this->encrypter = $encrypter;
+        $this->repository = $repository;
     }
 
     /**
@@ -49,6 +55,12 @@ class PasswordManager extends BaseService
 
         if (!empty($errors))
             return $this->setBadRequestError($errors);
+
+        if (count($this->repository->find([
+            ['name', $name],
+            ['folder_id', $folder->id],
+        ])))
+            return $this->setConflictError('A password with that name already exists in this folder');
 
         $newPassword = new Password();
 
