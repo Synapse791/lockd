@@ -8,6 +8,7 @@ use Lockd\Contracts\Repositories\FolderRepository;
 use Lockd\Contracts\Repositories\PasswordRepository;
 use Lockd\Hydrators\PasswordHydrator;
 use Lockd\Services\PasswordManager;
+use Lockd\Services\PermissionManager;
 
 class PasswordController extends BaseApiController
 {
@@ -23,6 +24,9 @@ class PasswordController extends BaseApiController
     /** @var PasswordManager */
     private $manager;
 
+    /** @var PermissionManager */
+    private $permissionManager;
+
     /**
      * PasswordController constructor
      *
@@ -30,31 +34,38 @@ class PasswordController extends BaseApiController
      * @param FolderRepository $folderRepository
      * @param PasswordHydrator $hydrator
      * @param PasswordManager $manager
+     * @param PermissionManager $permissionManager
      */
     public function __construct(
         PasswordRepository $repository,
         FolderRepository $folderRepository,
         PasswordHydrator $hydrator,
-        PasswordManager $manager
+        PasswordManager $manager,
+        PermissionManager $permissionManager
     ) {
         $this->repository = $repository;
         $this->folderRepository = $folderRepository;
         $this->hydrator = $hydrator;
         $this->manager = $manager;
+        $this->permissionManager = $permissionManager;
     }
 
     /**
      * Returns all passwords in the given folder
      *
+     * @param Request $request
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getFromFolder($id)
+    public function getFromFolder(Request $request, $id)
     {
         $folder = $this->folderRepository->findOneById($id);
 
         if (!$folder)
             return $this->jsonNotFound("Folder with ID {$id} not found");
+
+        if (!$this->permissionManager->checkUserHasAccessToFolder($request->user(), $folder))
+            return $this->jsonUnauthorized("You do not have access to that folder");
 
         $passwords = $this->repository->findPasswordsInFolder($folder);
 
@@ -80,6 +91,9 @@ class PasswordController extends BaseApiController
 
         if (!$folder)
             return $this->jsonNotFound("Folder with ID {$id} not found");
+
+        if (!$this->permissionManager->checkUserHasAccessToFolder($request->user(), $folder))
+            return $this->jsonUnauthorized("You do not have access to that folder");
 
         $validation = $factory->make($request->input(), [
             'name' => 'required|string',
@@ -118,6 +132,9 @@ class PasswordController extends BaseApiController
 
         if (!$folder)
             return $this->jsonNotFound("Folder with ID {$id} not found");
+
+        if (!$this->permissionManager->checkUserHasAccessToFolder($request->user(), $folder))
+            return $this->jsonUnauthorized("You do not have access to that folder");
 
         $password = $this->repository->find([
             ['id', $passwordId],

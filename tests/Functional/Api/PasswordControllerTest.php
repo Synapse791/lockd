@@ -2,12 +2,26 @@
 
 class PasswordControllerTest extends FunctionalTestCase
 {
+    private $authGroup;
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->authUser = factory(\Lockd\Models\User::class)->create();
+        $this->authGroup = factory(\Lockd\Models\Group::class)->create();
+        $this->authGroup->users()->attach($this->authUser);
+
+        $this->be($this->authUser);
+    }
+
     public function testGetFromFolder()
     {
         $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
         $this->ee['password1'] = factory(\Lockd\Models\Password::class)->create(['folder_id' => $this->ee['folder']->id]);
         $this->ee['password2'] = factory(\Lockd\Models\Password::class)->create(['folder_id' => $this->ee['folder']->id]);
         $this->ee['password3'] = factory(\Lockd\Models\Password::class)->create(['folder_id' => $this->ee['folder']->id]);
+
+        $this->authGroup->folders()->attach($this->ee['folder']);
 
         $this
             ->get("/api/folder/{$this->ee['folder']->id}/passwords")
@@ -38,6 +52,8 @@ class PasswordControllerTest extends FunctionalTestCase
     public function testCreate()
     {
         $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this->authGroup->folders()->attach($this->ee['folder']);
 
         $this->assertCount(0, $this->ee['folder']->passwords()->get());
 
@@ -76,6 +92,8 @@ class PasswordControllerTest extends FunctionalTestCase
     {
         $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
 
+        $this->authGroup->folders()->attach($this->ee['folder']);
+
         $this
             ->put("/api/folder/{$this->ee['folder']->id}/passwords", [])
             ->seeStatusCode(400)
@@ -107,6 +125,8 @@ class PasswordControllerTest extends FunctionalTestCase
             'folder_id' => $this->ee['folder']->id,
         ]);
 
+        $this->authGroup->folders()->attach($this->ee['folder']);
+
         $this
             ->put("/api/folder/{$this->ee['folder']->id}/passwords", [
                 'name' => 'TestPassword',
@@ -127,6 +147,8 @@ class PasswordControllerTest extends FunctionalTestCase
         $this->ee['password'] = factory(\Lockd\Models\Password::class)->create([
             'folder_id' => $this->ee['folder1']->id,
         ]);
+
+        $this->authGroup->folders()->attach($this->ee['folder1']);
 
         $this->seeInDatabase('da_password', [
             'name' => $this->ee['password']->name,
@@ -165,6 +187,8 @@ class PasswordControllerTest extends FunctionalTestCase
             'folder_id' => $this->ee['folder']->id,
         ]);
 
+        $this->authGroup->folders()->attach($this->ee['folder']);
+
         $this
             ->patch("/api/folder/{$this->ee['folder']->id}/passwords/{$this->ee['password2']->id}", [
                 'name' => $this->ee['password1']->name,
@@ -189,6 +213,8 @@ class PasswordControllerTest extends FunctionalTestCase
             'folder_id' => $this->ee['folder2']->id,
         ]);
 
+        $this->authGroup->folders()->attach($this->ee['folder1']);
+
         $this
             ->patch("/api/folder/{$this->ee['folder1']->id}/passwords/{$this->ee['password1']->id}", [
                 'name' => $this->ee['password2']->name,
@@ -198,6 +224,37 @@ class PasswordControllerTest extends FunctionalTestCase
             ->seeJson([
                 'error' => 'conflict',
                 'errorDescription' => 'A password with that name already exists in that folder',
+            ]);
+    }
+
+    public function testUpdateFolderNotFound()
+    {
+        $this
+            ->patch("/api/folder/1000/passwords/1000", [])
+            ->seeStatusCode(404)
+            ->seeJson([
+                'error' => 'not_found',
+                'errorDescription' => 'Folder with ID 1000 not found',
+            ]);
+    }
+
+    public function testUpdatePasswordNotFound()
+    {
+        $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this->authGroup->folders()->attach($this->ee['folder1']);
+
+        $this
+            ->patch("/api/folder/{$this->ee['folder1']->id}/passwords/1000", [
+                'name' => 'UpdateTest',
+                'url' => 'http://updatetest',
+                'user' => 'update_user',
+                'folder_id' => 0,
+            ])
+            ->seeStatusCode(404)
+            ->seeJson([
+                'error' => 'not_found',
+                'errorDescription' => 'Password with ID 1000 not found',
             ]);
     }
 }
