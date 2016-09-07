@@ -24,16 +24,24 @@ class FolderController extends BaseApiController
     /** @var FolderManager */
     private $manager;
 
+    /** @var PermissionManager */
+    private $permissionManager;
+
     /**
      * FolderController constructor
      *
      * @param FolderRepository $repository
      * @param FolderManager $manager
+     * @param PermissionManager $permissionManager
      */
-    public function __construct(FolderRepository $repository, FolderManager $manager)
-    {
+    public function __construct(
+        FolderRepository $repository,
+        FolderManager $manager,
+        PermissionManager $permissionManager
+    ) {
         $this->repository = $repository;
         $this->manager = $manager;
+        $this->permissionManager = $permissionManager;
     }
 
     /**
@@ -41,19 +49,18 @@ class FolderController extends BaseApiController
      * folder or sub folders of the provided folder
      *
      * @param Request $request
-     * @param PermissionManager $permissionManager
      * @param int $id
      * @param string|null $option
      * @return \Illuminate\Http\JsonResponse
      */
-    public function get(Request $request, PermissionManager $permissionManager, $id, $option = null)
+    public function get(Request $request, $id, $option = null)
     {
         $folder = $this->repository->findOneById($id);
 
         if (is_null($folder))
             return $this->jsonNotFound("Folder with ID {$id} not found");
 
-        if (!$permissionManager->checkUserHasAccessToFolder($request->user(), $folder))
+        if (!$this->permissionManager->checkUserHasAccessToFolder($request->user(), $folder))
             return $this->jsonUnauthorized("You do not have access to that folder");
 
         switch ($option) {
@@ -95,6 +102,9 @@ class FolderController extends BaseApiController
         if (!$parentFolder)
             return $this->jsonNotFound("Parent folder with ID {$request->input('parent_id')} not found");
 
+        if (!$this->permissionManager->checkUserHasAccessToFolder($request->user(), $parentFolder))
+            return $this->jsonUnauthorized('You do not have access to that folder');
+
         if (!$this->manager->create($parentFolder, $request->input('name')))
             return $this->jsonResponseFromService($this->manager);
 
@@ -128,10 +138,18 @@ class FolderController extends BaseApiController
         if (!$folder)
             return $this->jsonNotFound("Folder with ID {$id} not found");
 
+        if (!$this->permissionManager->checkUserHasAccessToFolder($request->user(), $folder))
+            return $this->jsonUnauthorized('You do not have access to that folder');
+
         if (isset($data['parent_id']) && !empty($data['parent_id'])) {
             $newParent = $this->repository->findOneById($data['parent_id']);
+
             if (!$newParent)
                 return $this->jsonNotFound("Parent folder with ID {$data['parent_id']} not found");
+
+            if (!$this->permissionManager->checkUserHasAccessToFolder($request->user(), $newParent))
+                return $this->jsonUnauthorized('You do not have access to that parent folder');
+
             $data['parentFolder'] = $newParent;
             unset($data['parent_id']);
         }

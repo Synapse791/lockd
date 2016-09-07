@@ -112,7 +112,15 @@ class FolderControllerTest extends FunctionalTestCase
 
     public function testCreate()
     {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
         $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this->ee['group']->users()->attach($this->ee['user']);
+        $this->ee['group']->folders()->attach($this->ee['folder1']);
+
+        $this->be($this->ee['user']);
 
         $data = [
             'name' => 'Test Folder',
@@ -161,8 +169,17 @@ class FolderControllerTest extends FunctionalTestCase
 
     public function testUpdate()
     {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
         $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
         $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this->ee['group']->users()->attach($this->ee['user']);
+        $this->ee['group']->folders()->attach($this->ee['folder1']);
+        $this->ee['group']->folders()->attach($this->ee['folder2']);
+
+        $this->be($this->ee['user']);
 
         $this->seeInDatabase('da_folder', [
             'id' => $this->ee['folder2']->id,
@@ -211,7 +228,15 @@ class FolderControllerTest extends FunctionalTestCase
 
     public function testUpdateParentNotFound()
     {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
         $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this->ee['group']->users()->attach($this->ee['user']);
+        $this->ee['group']->folders()->attach($this->ee['folder']);
+
+        $this->be($this->ee['user']);
 
         $this
             ->patch("/api/folder/{$this->ee['folder']->id}", [
@@ -223,4 +248,36 @@ class FolderControllerTest extends FunctionalTestCase
                 'errorDescription' => 'Parent folder with ID 1000 not found',
             ]);
     }
+
+    public function testUpdateNoAccessToParent()
+    {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
+        $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this->ee['group']->users()->attach($this->ee['user']);
+        $this->ee['group']->folders()->attach($this->ee['folder2']);
+
+        $this->be($this->ee['user']);
+
+        $this->seeInDatabase('da_folder', [
+            'id' => $this->ee['folder2']->id,
+            'name' => $this->ee['folder2']->name,
+            'parent_id' => "0",
+        ]);
+
+        $this
+            ->patch("/api/folder/{$this->ee['folder2']->id}", [
+                'name' => 'Updated Folder',
+                'parent_id' => $this->ee['folder1']->id,
+            ])
+            ->seeStatusCode(401)
+            ->seeJson([
+                'error' => 'unauthorized',
+                'errorDescription' => 'You do not have access to that parent folder',
+            ]);
+    }
+
 }
