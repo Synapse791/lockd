@@ -56,6 +56,22 @@ class BaseApiController extends Controller
     }
 
     /**
+     * Shortcut to return unauthorized response
+     *
+     * @param string $message
+     * @return JsonResponse
+     */
+    public function jsonUnauthorized($message)
+    {
+        return $this->jsonResponse(
+            [],
+            401,
+            'unauthorized',
+            $message
+        );
+    }
+
+    /**
      * Shortcut to return not found response
      *
      * @param string|array $message
