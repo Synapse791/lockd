@@ -56,10 +56,12 @@ class PasswordManager extends BaseService
         if (!empty($errors))
             return $this->setBadRequestError($errors);
 
-        if (count($this->repository->find([
-            ['name', $name],
-            ['folder_id', $folder->id],
-        ])))
+        if (
+            count($this->repository->find([
+                ['name', $name],
+                ['folder_id', $folder->id],
+            ])) > 0
+        )
             return $this->setConflictError('A password with that name already exists in this folder');
 
         $newPassword = new Password();
@@ -101,6 +103,23 @@ class PasswordManager extends BaseService
 
         if (isset($data['user']) && !empty($data['user']))
             $password->user = $data['user'];
+
+        if (isset($data['name'])) {
+            if (isset($data['folder']))
+                $count = count($this->repository->find([
+                    ['name', $data['name']],
+                    ['folder_id', $data['folder']->id],
+                ]));
+            else
+                $count = count($this->repository->find([
+                    ['name', $data['name']],
+                    ['folder_id', $password->folder->id],
+                ]));
+
+            if ($count > 0)
+                return $this->setConflictError("A password with that name already exists in that folder");
+        }
+
 
         if (isset($data['folder']) && !empty($data['folder']))
             if (!$this->associateEntities($password->folder(), $data['folder']))
