@@ -127,11 +127,7 @@ class PermissionManagerTest extends TestCase
             )
         );
     }
-
-
-
-
-
+    
     public function testCheckUserHasAccessToFolder()
     {
         $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
