@@ -127,4 +127,45 @@ class PermissionManagerTest extends TestCase
             )
         );
     }
+
+
+
+
+
+    public function testCheckUserHasAccessToFolder()
+    {
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+
+        $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this->ee['group']->users()->attach($this->ee['user']);
+        $this->ee['group']->folders()->attach($this->ee['folder']);
+
+        $this->assertTrue(
+            $this->service->checkUserHasAccessToFolder(
+                $this->ee['user'],
+                $this->ee['folder']
+            )
+        );
+    }
+
+    public function testCheckUserHasAccessToFolderNoAccess()
+    {
+        $this->ee['group1'] = factory(\Lockd\Models\Group::class)->create();
+        $this->ee['group2'] = factory(\Lockd\Models\Group::class)->create();
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+
+        $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this->ee['group1']->users()->attach($this->ee['user']);
+        $this->ee['group2']->folders()->attach($this->ee['folder']);
+
+        $this->assertFalse(
+            $this->service->checkUserHasAccessToFolder(
+                $this->ee['user'],
+                $this->ee['folder']
+            )
+        );
+    }
 }

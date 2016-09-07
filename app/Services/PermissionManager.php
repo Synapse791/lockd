@@ -55,6 +55,19 @@ class PermissionManager extends BaseService
     public function checkUserHasAccessToPassword(User $user, Password $password)
     {
         $folder = $password->folder;
+
+        return $this->checkUserHasAccessToFolder($user, $folder);
+    }
+
+    /**
+     * Check if a user has access to a folder
+     *
+     * @param User $user
+     * @param Folder $folder
+     * @return bool
+     */
+    public function checkUserHasAccessToFolder(User $user, Folder $folder)
+    {
         $folderGroups = $folder->groups;
 
         foreach ($user->groups as $group)
