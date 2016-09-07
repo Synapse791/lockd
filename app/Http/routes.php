@@ -17,7 +17,6 @@ Route::get('/', function () {
 
 Route::group(['prefix' => '/api/install', 'namespace' => 'Api\Install'], function () {
     Route::get('/check', 'CheckController@check');
-    Route::get('/database/check', 'DatabaseController@check');
     Route::post('/database', 'DatabaseController@task');
     Route::put('/administrator', 'AdministratorController@create');
 });
