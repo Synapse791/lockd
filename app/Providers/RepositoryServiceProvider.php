@@ -7,6 +7,7 @@ use Lockd\Repositories\DefaultFolderRepository;
 use Lockd\Repositories\DefaultGroupRepository;
 use Lockd\Repositories\DefaultPasswordRepository;
 use Lockd\Repositories\DefaultUserRepository;
+use Lockd\Services\PermissionManager;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -26,7 +27,7 @@ class RepositoryServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(\Lockd\Contracts\Repositories\FolderRepository::class, function () {
-            return new DefaultFolderRepository();
+            return new DefaultFolderRepository(new PermissionManager());
         });
 
         $this->app->bind(\Lockd\Contracts\Repositories\PasswordRepository::class, function () {

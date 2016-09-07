@@ -2,11 +2,27 @@
 
 namespace Lockd\Repositories;
 
+use Illuminate\Database\Eloquent\Collection;
 use Lockd\Contracts\Repositories\FolderRepository;
 use Lockd\Models\Folder;
+use Lockd\Models\User;
+use Lockd\Services\PermissionManager;
 
 class DefaultFolderRepository implements FolderRepository
 {
+    /** @var PermissionManager */
+    private $permissionManager;
+
+    /**
+     * DefaultFolderRepository constructor
+     *
+     * @param PermissionManager $permissionManager
+     */
+    public function __construct(PermissionManager $permissionManager)
+    {
+        $this->permissionManager = $permissionManager;
+    }
+
     public function find(array $parameters = [])
     {
         return empty($parameters)
@@ -22,6 +38,19 @@ class DefaultFolderRepository implements FolderRepository
     public function findSubFolders(Folder $folder)
     {
         return $folder->folders()->get();
+    }
+
+    public function findUsersSubFolders(User $user, Folder $folder)
+    {
+        $folderCollection = new Collection();
+
+        $subFolders = $folder->folders;
+
+        foreach ($subFolders as $subFolder)
+            if ($this->permissionManager->checkUserHasAccessToFolder($user, $subFolder))
+                $folderCollection->add($subFolder);
+
+        return $folderCollection;
     }
 
     public function findParent(Folder $folder)

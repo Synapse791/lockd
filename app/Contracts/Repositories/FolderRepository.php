@@ -1,7 +1,9 @@
 <?php
 
 namespace Lockd\Contracts\Repositories;
+use Illuminate\Database\Eloquent\Collection;
 use Lockd\Models\Folder;
+use Lockd\Models\User;
 
 /**
  * Interface FolderRepository
@@ -34,6 +36,15 @@ interface FolderRepository
      * @return \Illuminate\Database\Eloquent\Collection|null
      */
     public function findSubFolders(Folder $folder);
+
+    /**
+     * Finds all sub folders a user has access to
+     *
+     * @param User $user
+     * @param Folder $folder
+     * @return Collection
+     */
+    public function findUsersSubFolders(User $user, Folder $folder);
 
     /**
      * Finds the parent folder of the provided folder

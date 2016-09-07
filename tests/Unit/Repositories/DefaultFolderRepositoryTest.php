@@ -5,10 +5,18 @@ class DefaultFolderRepositoryTest extends TestCase
     /** @var \Lockd\Repositories\DefaultFolderRepository */
     private $repository;
 
+    private function setRepository($mockPermissionManager = null)
+    {
+        if (is_null($mockPermissionManager))
+            $mockPermissionManager = Mockery::mock(\Lockd\Services\PermissionManager::class);
+
+        $this->repository = new \Lockd\Repositories\DefaultFolderRepository($mockPermissionManager);
+    }
+
     public function setUp()
     {
         parent::setUp();
-        $this->repository = new \Lockd\Repositories\DefaultFolderRepository();
+        $this->setRepository();
     }
 
     public function tearDown()
@@ -105,6 +113,54 @@ class DefaultFolderRepositoryTest extends TestCase
         $results = $this->repository->findSubFolders($this->ee['folder1']);
 
         $this->assertCount(0, $results);
+    }
+
+    public function testFindUsersSubFolders()
+    {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
+        $this->ee['rootFolder'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['rootFolder']->id]);
+        $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['rootFolder']->id]);
+        $this->ee['folder3'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['rootFolder']->id]);
+
+        $this->ee['group']->users()->attach($this->ee['user']);
+        $this->ee['group']->folders()->attach($this->ee['folder1']);
+        $this->ee['group']->folders()->attach($this->ee['folder2']);
+
+        $mockPermissionManager = Mockery::mock(\Lockd\Services\PermissionManager::class);
+        $mockPermissionManager
+            ->shouldReceive('checkUserHasAccessToFolder')
+            ->once()
+            ->ordered()
+            ->andReturn(true);
+
+        $mockPermissionManager
+            ->shouldReceive('checkUserHasAccessToFolder')
+            ->once()
+            ->ordered()
+            ->andReturn(false);
+
+        $mockPermissionManager
+            ->shouldReceive('checkUserHasAccessToFolder')
+            ->once()
+            ->ordered()
+            ->andReturn(true);
+
+        $this->setRepository($mockPermissionManager);
+
+        $results = $this->repository->findUsersSubFolders($this->ee['user'], $this->ee['rootFolder']);
+
+        $this->assertCount(2, $results);
+
+        $this->assertInstanceOf(\Lockd\Models\Folder::class, $results[0]);
+        $this->assertEquals($this->ee['folder1']->id, $results[0]->id);
+        $this->assertEquals($this->ee['folder1']->name, $results[0]->name);
+
+        $this->assertInstanceOf(\Lockd\Models\Folder::class, $results[1]);
+        $this->assertEquals($this->ee['folder3']->id, $results[1]->id);
+        $this->assertEquals($this->ee['folder3']->name, $results[1]->name);
     }
 
     public function testFindParent()
