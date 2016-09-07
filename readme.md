@@ -1,6 +1,7 @@
 # lockd
 
 [![Build Status](https://travis-ci.org/Synapse791/lockd.svg?branch=master)](https://travis-ci.org/Synapse791/lockd)
+[![codecov](https://codecov.io/gh/Synapse791/lockd/branch/master/graph/badge.svg)](https://codecov.io/gh/Synapse791/lockd)
 
 ## License
 
