@@ -4,8 +4,17 @@ class FolderControllerTest extends FunctionalTestCase
 {
     public function testGetSingleFolder()
     {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
         $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
         $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this->ee['group']->users()->attach($this->ee['user']);
+        $this->ee['group']->folders()->attach($this->ee['folder1']);
+        $this->ee['group']->folders()->attach($this->ee['folder2']);
+
+        $this->be($this->ee['user']);
 
         $this
             ->get("/api/folder/{$this->ee['folder2']->id}")
@@ -18,15 +27,19 @@ class FolderControllerTest extends FunctionalTestCase
 
     public function testGetSubFolders()
     {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
         $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['folder1']->id]);
+        $this->ee['folder3'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['folder1']->id]);
 
-        $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create([
-            'parent_id' => $this->ee['folder1']->id,
-        ]);
+        $this->ee['group']->users()->attach($this->ee['user']);
+        $this->ee['group']->folders()->attach($this->ee['folder1']);
+        $this->ee['group']->folders()->attach($this->ee['folder2']);
+        $this->ee['group']->folders()->attach($this->ee['folder3']);
 
-        $this->ee['folder3'] = factory(\Lockd\Models\Folder::class)->create([
-            'parent_id' => $this->ee['folder1']->id,
-        ]);
+        $this->be($this->ee['user']);
 
         $this
             ->get("/api/folder/{$this->ee['folder1']->id}/folders")
@@ -43,11 +56,17 @@ class FolderControllerTest extends FunctionalTestCase
 
     public function testGetParent()
     {
-        $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
 
-        $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create([
-            'parent_id' => $this->ee['folder1']->id,
-        ]);
+        $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['folder1']->id]);
+
+        $this->ee['group']->users()->attach($this->ee['user']);
+        $this->ee['group']->folders()->attach($this->ee['folder1']);
+        $this->ee['group']->folders()->attach($this->ee['folder2']);
+
+        $this->be($this->ee['user']);
 
         $this
             ->get("/api/folder/{$this->ee['folder2']->id}/parent")
@@ -55,6 +74,19 @@ class FolderControllerTest extends FunctionalTestCase
             ->seeJson([
                 'id' => $this->ee['folder1']->id,
                 'name' => $this->ee['folder1']->name,
+            ]);
+    }
+
+    public function testGetSingleFolderNoAccess()
+    {
+        $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this
+            ->get("/api/folder/{$this->ee['folder']->id}")
+            ->seeStatusCode(401)
+            ->seeJson([
+                'error' => 'unauthorized',
+                'errorDescription' => 'You do not have access to that folder',
             ]);
     }
 

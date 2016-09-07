@@ -5,7 +5,9 @@ namespace Lockd\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Factory;
 use Lockd\Contracts\Repositories\FolderRepository;
+use Lockd\Models\Folder;
 use Lockd\Services\FolderManager;
+use Lockd\Services\PermissionManager;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -35,18 +37,24 @@ class FolderController extends BaseApiController
     }
 
     /**
-     * Return either a single folder,
+     * Returns either a single folder, the parent of the provided
+     * folder or sub folders of the provided folder
      *
+     * @param Request $request
+     * @param PermissionManager $permissionManager
      * @param int $id
      * @param string|null $option
      * @return \Illuminate\Http\JsonResponse
      */
-    public function get($id, $option = null)
+    public function get(Request $request, PermissionManager $permissionManager, $id, $option = null)
     {
         $folder = $this->repository->findOneById($id);
 
         if (is_null($folder))
             return $this->jsonNotFound("Folder with ID {$id} not found");
+
+        if (!$permissionManager->checkUserHasAccessToFolder($request->user(), $folder))
+            return $this->jsonUnauthorized("You do not have access to that folder");
 
         switch ($option) {
             case null:
@@ -56,7 +64,7 @@ class FolderController extends BaseApiController
                 $data = $this->repository->findParent($folder);
                 break;
             case 'folders':
-                $data = $this->repository->findSubFolders($folder);
+                $data = $this->repository->findUsersSubFolders($request->user(), $folder);
                 break;
             default:
                 throw new NotFoundHttpException();
