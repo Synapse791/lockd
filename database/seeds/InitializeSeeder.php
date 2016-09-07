@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class RootFolderSeeder extends Seeder
+class InitializeSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,6 +14,10 @@ class RootFolderSeeder extends Seeder
         DB::table('da_folder')->insert([
             'parent_id' => 0,
             'name' => 'Root',
+        ]);
+
+        DB::table('au_group')->insert([
+            'name' => 'Administrators',
         ]);
     }
 }
