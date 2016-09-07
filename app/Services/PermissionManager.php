@@ -45,6 +45,13 @@ class PermissionManager extends BaseService
         return $this->detachEntities($group->folders(), $folder);
     }
 
+    /**
+     * Checks if a user has access to a password
+     *
+     * @param User $user
+     * @param Password $password
+     * @return bool
+     */
     public function checkUserHasAccessToPassword(User $user, Password $password)
     {
         $folder = $password->folder;
