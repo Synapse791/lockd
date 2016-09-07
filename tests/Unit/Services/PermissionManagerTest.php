@@ -88,4 +88,43 @@ class PermissionManagerTest extends TestCase
 
         $this->assertCount(0, $this->ee['group']->folders()->get());
     }
+
+    public function testCheckUserHasAccessToPassword()
+    {
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+
+        $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['password'] = factory(\Lockd\Models\Password::class)->create(['folder_id' => $this->ee['folder']->id]);
+
+        $this->ee['group']->users()->attach($this->ee['user']);
+        $this->ee['group']->folders()->attach($this->ee['folder']);
+
+        $this->assertTrue(
+            $this->service->checkUserHasAccessToPassword(
+                $this->ee['user'],
+                $this->ee['password']
+            )
+        );
+    }
+
+    public function testCheckUserHasAccessToPasswordNoAccess()
+    {
+        $this->ee['group1'] = factory(\Lockd\Models\Group::class)->create();
+        $this->ee['group2'] = factory(\Lockd\Models\Group::class)->create();
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+
+        $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['password'] = factory(\Lockd\Models\Password::class)->create(['folder_id' => $this->ee['folder']->id]);
+
+        $this->ee['group1']->users()->attach($this->ee['user']);
+        $this->ee['group2']->folders()->attach($this->ee['folder']);
+
+        $this->assertFalse(
+            $this->service->checkUserHasAccessToPassword(
+                $this->ee['user'],
+                $this->ee['password']
+            )
+        );
+    }
 }

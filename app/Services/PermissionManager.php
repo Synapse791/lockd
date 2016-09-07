@@ -4,6 +4,8 @@ namespace Lockd\Services;
 
 use Lockd\Models\Folder;
 use Lockd\Models\Group;
+use Lockd\Models\Password;
+use Lockd\Models\User;
 
 /**
  * Class PermissionManager
@@ -41,5 +43,17 @@ class PermissionManager extends BaseService
     public function removeGroupAccessFromFolder(Group $group, Folder $folder)
     {
         return $this->detachEntities($group->folders(), $folder);
+    }
+
+    public function checkUserHasAccessToPassword(User $user, Password $password)
+    {
+        $folder = $password->folder;
+        $folderGroups = $folder->groups;
+
+        foreach ($user->groups as $group)
+            if ($folderGroups->contains($group))
+                return true;
+
+        return false;
     }
 }
