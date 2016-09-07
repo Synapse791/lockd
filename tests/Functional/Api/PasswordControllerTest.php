@@ -14,6 +14,14 @@ class PasswordControllerTest extends FunctionalTestCase
         $this->be($this->authUser);
     }
 
+    public function tearDown()
+    {
+        $this->authGroup->delete();
+        $this->authUser->delete();
+        unset($this->authGroup);
+        parent::tearDown();
+    }
+
     public function testGetFromFolder()
     {
         $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
