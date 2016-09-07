@@ -49,6 +49,7 @@ Route::group([
 
             Route::get('/', 'PasswordController@getFromFolder');
             Route::put('/', 'PasswordController@create');
+            Route::patch('/{passwordId}', 'PasswordController@update');
 
         });
 

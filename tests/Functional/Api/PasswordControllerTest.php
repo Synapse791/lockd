@@ -119,4 +119,85 @@ class PasswordControllerTest extends FunctionalTestCase
                 'errorDescription' => 'A password with that name already exists in this folder',
             ]);
     }
+
+    public function testUpdate()
+    {
+        $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['password'] = factory(\Lockd\Models\Password::class)->create([
+            'folder_id' => $this->ee['folder1']->id,
+        ]);
+
+        $this->seeInDatabase('da_password', [
+            'name' => $this->ee['password']->name,
+            'url' => $this->ee['password']->url,
+            'user' => $this->ee['password']->user,
+            'folder_id' => $this->ee['folder1']->id,
+        ]);
+
+        $this
+            ->patch("/api/folder/{$this->ee['folder1']->id}/passwords/{$this->ee['password']->id}", [
+                'name' => 'UpdateTest',
+                'url' => 'http://updatetest',
+                'user' => 'update_user',
+                'folder_id' => $this->ee['folder2']->id,
+            ])
+            ->seeStatusCode(200)
+            ->seeJson([
+                'data' => 'Password updated successfully',
+            ]);
+
+        $this->seeInDatabase('da_password', [
+            'name' => 'UpdateTest',
+            'url' => 'http://updatetest',
+            'user' => 'update_user',
+            'folder_id' => $this->ee['folder2']->id,
+        ]);
+    }
+
+    public function testUpdateDuplicateInSameFolder()
+    {
+        $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['password1'] = factory(\Lockd\Models\Password::class)->create([
+            'folder_id' => $this->ee['folder']->id,
+        ]);
+        $this->ee['password2'] = factory(\Lockd\Models\Password::class)->create([
+            'folder_id' => $this->ee['folder']->id,
+        ]);
+
+        $this
+            ->patch("/api/folder/{$this->ee['folder']->id}/passwords/{$this->ee['password2']->id}", [
+                'name' => $this->ee['password1']->name,
+            ])
+            ->seeStatusCode(409)
+            ->seeJson([
+                'error' => 'conflict',
+                'errorDescription' => 'A password with that name already exists in that folder',
+            ]);
+    }
+
+    public function testUpdateDuplicateInNewFolder()
+    {
+        $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['password1'] = factory(\Lockd\Models\Password::class)->create([
+            'name' => 'Password 1',
+            'folder_id' => $this->ee['folder1']->id,
+        ]);
+        $this->ee['password2'] = factory(\Lockd\Models\Password::class)->create([
+            'name' => 'Password 2',
+            'folder_id' => $this->ee['folder2']->id,
+        ]);
+
+        $this
+            ->patch("/api/folder/{$this->ee['folder1']->id}/passwords/{$this->ee['password1']->id}", [
+                'name' => $this->ee['password2']->name,
+                'folder_id' => $this->ee['password2']->folder->id,
+            ])
+            ->seeStatusCode(409)
+            ->seeJson([
+                'error' => 'conflict',
+                'errorDescription' => 'A password with that name already exists in that folder',
+            ]);
+    }
 }

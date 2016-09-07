@@ -102,4 +102,54 @@ class PasswordController extends BaseApiController
 
         return $this->jsonResponse('Password created successfully', 201);
     }
+
+    /**
+     * Updates a password with the provided details
+     *
+     * @param Factory $factory
+     * @param Request $request
+     * @param int $id
+     * @param int $passwordId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Factory $factory, Request $request, $id, $passwordId)
+    {
+        $folder = $this->folderRepository->findOneById($id);
+
+        if (!$folder)
+            return $this->jsonNotFound("Folder with ID {$id} not found");
+
+        $password = $this->repository->find([
+            ['id', $passwordId],
+            ['folder_id', $id],
+        ])->first();
+
+        if (!$password)
+            return $this->jsonNotFound("Password with ID {$passwordId} not found");
+
+        $validation = $factory->make($request->input(), [
+            'name' => 'string',
+            'url' => 'string',
+            'user' => 'string',
+            'password' => 'string|confirmed',
+            'folder_id' => 'integer',
+        ]);
+
+        if ($validation->fails())
+            return $this->jsonValidationBadRequest($validation);
+
+        $data = $request->input();
+
+        if ($request->input('folder_id', false)) {
+            $data['folder'] = $this->folderRepository->findOneById($request->input('folder_id'));
+            if (!$data['folder'])
+                return $this->jsonNotFound("Folder with ID {$request->input('folder_id')} not found");
+            unset($data['folder_id']);
+        }
+
+        if (!$this->manager->update($password, $data))
+            return $this->jsonResponseFromService($this->manager);
+
+        return $this->jsonResponse('Password updated successfully', 200);
+    }
 }
