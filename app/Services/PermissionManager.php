@@ -46,6 +46,20 @@ class PermissionManager extends BaseService
     }
 
     /**
+     * Checks if a user is in a group
+     *
+     * @param User $user
+     * @param Group $group
+     * @return bool
+     */
+    public function checkUserIsInGroup(User $user, Group $group)
+    {
+        $userGroups = $user->groups;
+
+        return $userGroups->contains($group);
+    }
+
+    /**
      * Checks if a user has access to a password
      *
      * @param User $user

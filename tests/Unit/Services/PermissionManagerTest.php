@@ -89,6 +89,24 @@ class PermissionManagerTest extends TestCase
         $this->assertCount(0, $this->ee['group']->folders()->get());
     }
 
+    public function testCheckUserIsInGroupTrue()
+    {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
+        $this->ee['group']->users()->attach($this->ee['user']);
+
+        $this->assertTrue($this->service->checkUserIsInGroup($this->ee['user'], $this->ee['group']));
+    }
+
+    public function testCheckUserIsInGroupFalse()
+    {
+        $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
+        $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
+
+        $this->assertFalse($this->service->checkUserIsInGroup($this->ee['user'], $this->ee['group']));
+    }
+
     public function testCheckUserHasAccessToPassword()
     {
         $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
