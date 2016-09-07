@@ -76,6 +76,11 @@ class PasswordController extends BaseApiController
      */
     public function create(Factory $factory, Request $request, $id)
     {
+        $folder = $this->folderRepository->findOneById($id);
+
+        if (!$folder)
+            return $this->jsonNotFound("Folder with ID {$id} not found");
+
         $validation = $factory->make($request->input(), [
             'name' => 'required|string',
             'url' => 'string',
@@ -85,11 +90,6 @@ class PasswordController extends BaseApiController
 
         if ($validation->fails())
             return $this->jsonValidationBadRequest($validation);
-
-        $folder = $this->folderRepository->findOneById($id);
-
-        if (!$folder)
-            return $this->jsonNotFound("Folder with ID {$id} not found");
 
         if (!$this->manager->create(
             $folder,
