@@ -69,6 +69,15 @@ class FolderControllerTest extends FunctionalTestCase
             ]);
     }
 
+    public function testGetUnknownOption()
+    {
+        $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this
+            ->get("/api/folder/{$this->ee['folder']->id}/nothing")
+            ->seeStatusCode(404);
+    }
+
     public function testCreate()
     {
         $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();

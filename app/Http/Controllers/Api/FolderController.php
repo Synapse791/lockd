@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Factory;
 use Lockd\Contracts\Repositories\FolderRepository;
 use Lockd\Services\FolderManager;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Class FolderController
@@ -58,8 +59,7 @@ class FolderController extends BaseApiController
                 $data = $this->repository->findSubFolders($folder);
                 break;
             default:
-                return $this->jsonNotFound('Endpoint not found');
-                break;
+                throw new NotFoundHttpException();
         }
 
         return $this->jsonResponse($data);
