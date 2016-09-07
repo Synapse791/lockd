@@ -1,0 +1,24 @@
+.ui.button.primary {
+  background-color: #577b8b; }
+  .ui.button.primary:hover, .ui.button.primary:focus, .ui.button.primary:active {
+    background-color: #4d6d7b; }
+
+body {
+  background-color: #eef2e1;
+  color: #010824; }
+
+#toast-container {
+  top: 70px; }
+
+.header.item .brand-name {
+  margin-left: 10px; }
+
+.ui.steps {
+  margin: 0 auto; }
+
+.controls {
+  overflow: hidden; }
+  .controls .button {
+    float: right; }
+
+/*# sourceMappingURL=install.css.map */

@@ -11,13 +11,28 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/install', function () {
+    if (Storage::exists('setup.lock'))
+        return Redirect::to('/');
+    return View::make('install');
+});
+
+Route::group(['middleware' => ['setup-check']], function () {
+    Route::get('/', function () {return View::make('login');});
+
+    Route::group(['namespace' => 'Auth'], function() {
+        Route::post('/login', 'AuthController@postLogin');
+        Route::get('/logout', 'AuthController@getLogout');
+    });
+
+    Route::get('/dashboard', function () {return View::make('dashboard');})
+        ->middleware(['auth']);
 });
 
 Route::group(['prefix' => '/api/install', 'namespace' => 'Api\Install'], function () {
-    Route::get('/check', 'CheckController@check');
-    Route::post('/database', 'DatabaseController@task');
+    Route::get('/check/{check}', 'CheckController@check');
+    Route::get('/database/{task}', 'DatabaseController@task');
+    Route::post('/database/{task}', 'DatabaseController@task');
     Route::put('/administrator', 'AdministratorController@create');
 });
 

@@ -5,7 +5,6 @@ namespace Lockd\Http\Controllers\Api\Install;
 use Illuminate\Http\Request;
 use Lockd\Http\Controllers\Api\BaseApiController;
 use Illuminate\Database\DatabaseManager;
-use Illuminate\Database\QueryException;
 use Illuminate\Log\Writer;
 use Illuminate\Support\Facades\Artisan;
 
@@ -28,10 +27,10 @@ class DatabaseController extends BaseApiController
         $this->databaseManager = $databaseManager;
     }
 
-    public function task(Request $request)
+    public function task($task)
     {
         try {
-            switch ($request->query('task')) {
+            switch ($task) {
                 case 'check':
                     return $this->jsonResponse(
                         $this->databaseManager->connection()->getDatabaseName() ? true : false
@@ -40,13 +39,13 @@ class DatabaseController extends BaseApiController
                     $exitCode = Artisan::call('migrate:install');
                     return $this->jsonResponse($exitCode == 0);
                 case 'migrate':
-                    $exitCode = Artisan::call('migrate');
+                    $exitCode = Artisan::call('migrate', ['--force' => true]);
                     return $this->jsonResponse($exitCode == 0);
                 case 'seed':
-                    $exitCode = Artisan::call('db:seed');
+                    $exitCode = Artisan::call('db:seed', ['--force' => true]);
                     return $this->jsonResponse($exitCode == 0);
                 default:
-                    return $this->jsonBadRequest("Unknown task: {$request->query('task')}");
+                    return $this->jsonBadRequest("Unknown task: {$task}");
             }
         } catch (\PDOException $e) {
             $this->logger->error($e->getMessage() . $e->getTraceAsString());

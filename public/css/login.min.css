@@ -1,0 +1,18 @@
+.ui.button.primary {
+  background-color: #577b8b; }
+  .ui.button.primary:hover, .ui.button.primary:focus, .ui.button.primary:active {
+    background-color: #4d6d7b; }
+
+.ui.button.primary {
+  background-color: #577b8b; }
+  .ui.button.primary:hover, .ui.button.primary:focus, .ui.button.primary:active {
+    background-color: #4d6d7b; }
+
+body {
+  background-color: #eef2e1;
+  color: #010824; }
+
+.ui.very.padded.segment {
+  margin-top: 50px; }
+
+/*# sourceMappingURL=login.min.css.map */

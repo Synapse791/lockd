@@ -1,0 +1,21 @@
+@import "partials/global";
+
+#toast-container {
+  top: 70px;
+}
+
+.header.item .brand-name {
+  margin-left: 10px;
+}
+
+.ui.steps {
+  margin: 0 auto;
+}
+
+.controls {
+  overflow: hidden;
+
+  .button {
+    float: right;
+  }
+}
