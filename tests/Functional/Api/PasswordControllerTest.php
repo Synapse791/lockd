@@ -34,4 +34,89 @@ class PasswordControllerTest extends FunctionalTestCase
                 'password' => base64_encode('letmein'),
             ]);
     }
+
+    public function testCreate()
+    {
+        $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this->assertCount(0, $this->ee['folder']->passwords()->get());
+
+        $data = [
+            'name' => 'Test Password',
+            'url' => 'http://test',
+            'user' => 'UserName',
+            'password' => 'letmein',
+            'password_confirmation' => 'letmein',
+        ];
+
+        $this
+            ->put("/api/folder/{$this->ee['folder']->id}/passwords", $data)
+            ->seeStatusCode(201)
+            ->seeJson([
+                'data' => 'Password created successfully',
+            ]);
+
+        unset($data['password']);
+        unset($data['password_confirmation']);
+        $data['folder_id'] = $this->ee['folder']->id;
+
+        $this->seeInDatabase('da_password', $data);
+
+        $this->assertCount(1, $this->ee['folder']->passwords()->get());
+
+        $this->ee['password'] = \Lockd\Models\Password::where([
+            ['name', $data['name']],
+            ['url', $data['url']],
+            ['user', $data['user']],
+            ['folder_id', $data['folder_id']],
+        ])->first();
+    }
+
+    public function testCreateBadRequest()
+    {
+        $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
+
+        $this
+            ->put("/api/folder/{$this->ee['folder']->id}/passwords", [])
+            ->seeStatusCode(400)
+            ->seeJson([
+                'error' => 'bad_request',
+                'errorDescription' => [
+                    'The name field is required.',
+                    'The password field is required.'
+                ],
+            ]);
+    }
+
+    public function testCreateNotFound()
+    {
+        $this
+            ->put("/api/folder/1000/passwords", [])
+            ->seeStatusCode(404)
+            ->seeJson([
+                'error' => 'not_found',
+                'errorDescription' => 'Folder with ID 1000 not found',
+            ]);
+    }
+
+    public function testCreateConflict()
+    {
+        $this->ee['folder'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['password'] = factory(\Lockd\Models\Password::class)->create([
+            'name' => 'TestPassword',
+            'folder_id' => $this->ee['folder']->id,
+        ]);
+
+        $this
+            ->put("/api/folder/{$this->ee['folder']->id}/passwords", [
+                'name' => 'TestPassword',
+                'password' => 'letmein',
+                'password_confirmation' => 'letmein',
+            ])
+            ->seeStatusCode(409)
+            ->seeJson([
+                'error' => 'conflict',
+                'errorDescription' => 'A password with that name already exists in this folder',
+            ]);
+    }
 }
