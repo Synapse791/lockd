@@ -95,7 +95,7 @@ class GroupManagerTest extends TestCase
         ]);
 
         $this->assertTrue(
-            $this->service->attachEntities($this->ee['group']->users(), $this->ee['user'])
+            $this->service->addUserToGroup($this->ee['user'], $this->ee['group'])
         );
 
         $this->seeInDatabase('au_user_groups', [
@@ -117,7 +117,7 @@ class GroupManagerTest extends TestCase
         ]);
 
         $this->assertTrue(
-            $this->service->detachEntities($this->ee['group']->users(), $this->ee['user'])
+            $this->service->removeUserFromGroup($this->ee['user'], $this->ee['group'])
         );
 
         $this->dontSeeInDatabase('au_user_groups', [
