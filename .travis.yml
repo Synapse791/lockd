@@ -17,3 +17,6 @@ before_script:
 script:
   - vendor/bin/phpunit --testsuite "Unit Test Suite"
   - vendor/bin/phpunit --testsuite "Functional Test Suite"
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
