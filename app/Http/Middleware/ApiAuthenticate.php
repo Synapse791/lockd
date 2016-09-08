@@ -30,7 +30,7 @@ class ApiAuthenticate
                         'errorDescription' => 'You need to be properly authenticated to access that',
                     ], 401);
                 } else {
-                    return redirect()->guest('login');
+                    return redirect()->guest('/');
                 }
             }
         }
