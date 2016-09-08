@@ -1,0 +1,24 @@
+@import "partials/colour-scheme";
+@import "partials/semantic-override";
+@import "partials/global";
+@import "partials/sidebar";
+
+body {
+  padding-left: 250px;
+
+  * {
+    font-family: Roboto, sans-serif;
+  }
+}
+
+main {
+  padding: 25px 50px;
+}
+
+.ui.card {
+  height: 100%;
+}
+
+#password_copy_container {
+  display: none;
+}

@@ -1,0 +1,45 @@
+.ui.button.primary {
+  background-color: #577b8b; }
+  .ui.button.primary:hover, .ui.button.primary:focus, .ui.button.primary:active {
+    background-color: #4d6d7b; }
+
+.ui.button.primary {
+  background-color: #577b8b; }
+  .ui.button.primary:hover, .ui.button.primary:focus, .ui.button.primary:active {
+    background-color: #4d6d7b; }
+
+body {
+  background-color: #eef2e1;
+  color: #010824; }
+
+.lockd.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 250px;
+  padding: 25px;
+  background-color: #243957;
+  color: #eef2e1; }
+  .lockd.sidebar .ui.menu .item {
+    color: #eef2e1; }
+  .lockd.sidebar .ui.header {
+    margin: 15px 0 10px 0;
+    text-align: center;
+    color: inherit; }
+
+body {
+  padding-left: 250px; }
+  body * {
+    font-family: Roboto, sans-serif; }
+
+main {
+  padding: 25px 50px; }
+
+.ui.card {
+  height: 100%; }
+
+#password_copy_container {
+  display: none; }
+
+/*# sourceMappingURL=dashboard.min.css.map */

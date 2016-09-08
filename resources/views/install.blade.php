@@ -6,7 +6,7 @@
     <title>lockd - Installation</title>
     <link rel="stylesheet" href="/lib/toastr/toastr.min.css">
     <link rel="stylesheet" href="/lib/semantic/dist/semantic.min.css">
-    <link rel="stylesheet" href="/css/install.css">
+    <link rel="stylesheet" href="/css/install.min.css">
 </head>
 <body>
 
