@@ -19,5 +19,10 @@ class InitializeSeeder extends Seeder
         DB::table('au_group')->insert([
             'name' => 'Administrators',
         ]);
+
+        DB::table('au_group_folders')->insert([
+            'group_id' => 1,
+            'folder_id' => 1,
+        ]);
     }
 }
