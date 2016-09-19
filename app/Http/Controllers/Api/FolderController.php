@@ -5,6 +5,7 @@ namespace Lockd\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Factory;
 use Lockd\Contracts\Repositories\FolderRepository;
+use Lockd\Hydrators\FolderHydrator;
 use Lockd\Models\Folder;
 use Lockd\Services\FolderManager;
 use Lockd\Services\PermissionManager;
@@ -49,11 +50,12 @@ class FolderController extends BaseApiController
      * folder or sub folders of the provided folder
      *
      * @param Request $request
-     * @param int $id
-     * @param string|null $option
+     * @param FolderHydrator $hydrator
+     * @param $id
+     * @param null $option
      * @return \Illuminate\Http\JsonResponse
      */
-    public function get(Request $request, $id, $option = null)
+    public function get(Request $request, FolderHydrator $hydrator, $id, $option = null)
     {
         $folder = $this->repository->findOneById($id);
 
@@ -65,13 +67,16 @@ class FolderController extends BaseApiController
 
         switch ($option) {
             case null:
-                $data = $folder;
+                $data = $hydrator->hydrate($folder);
                 break;
             case 'parent':
-                $data = $this->repository->findParent($folder);
+                $data = $hydrator->hydrate($this->repository->findParent($folder));
                 break;
             case 'folders':
-                $data = $this->repository->findUsersSubFolders($request->user(), $folder);
+                $subFolders = $this->repository->findUsersSubFolders($request->user(), $folder);
+                $data = [];
+                foreach ($subFolders as $subFolder)
+                    $data[] = $hydrator->hydrate($subFolder);
                 break;
             default:
                 throw new NotFoundHttpException();
