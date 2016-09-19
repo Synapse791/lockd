@@ -8,7 +8,19 @@ class FolderControllerTest extends FunctionalTestCase
         $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
 
         $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
-        $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create([
+            'parent_id' => $this->ee['folder1']->id,
+        ]);
+        $this->ee['folder3'] = factory(\Lockd\Models\Folder::class)->create([
+            'parent_id' => $this->ee['folder2']->id,
+        ]);
+        $this->ee['folder4'] = factory(\Lockd\Models\Folder::class)->create([
+            'parent_id' => $this->ee['folder2']->id,
+        ]);
+
+        $this->ee['password'] = factory(\Lockd\Models\Password::class)->create([
+            'folder_id' => $this->ee['folder2']->id
+        ]);
 
         $this->ee['group']->users()->attach($this->ee['user']);
         $this->ee['group']->folders()->attach($this->ee['folder1']);
@@ -22,6 +34,8 @@ class FolderControllerTest extends FunctionalTestCase
             ->seeJson([
                 'id' => $this->ee['folder2']->id,
                 'name' => $this->ee['folder2']->name,
+                'folder_count' => 2,
+                'password_count' => 1,
             ]);
     }
 
@@ -33,6 +47,12 @@ class FolderControllerTest extends FunctionalTestCase
         $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
         $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['folder1']->id]);
         $this->ee['folder3'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['folder1']->id]);
+
+        $this->ee['folder4'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['folder2']->id]);
+        $this->ee['folder5'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['folder2']->id]);
+        $this->ee['folder6'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['folder3']->id]);
+
+        $this->ee['password'] = factory(\Lockd\Models\Password::class)->create(['folder_id' => $this->ee['folder3']->id]);
 
         $this->ee['group']->users()->attach($this->ee['user']);
         $this->ee['group']->folders()->attach($this->ee['folder1']);
@@ -47,10 +67,14 @@ class FolderControllerTest extends FunctionalTestCase
             ->seeJson([
                 'id' => $this->ee['folder2']->id,
                 'name' => $this->ee['folder2']->name,
+                'folder_count' => 2,
+                'password_count' => 0,
             ])
             ->seeJson([
                 'id' => $this->ee['folder3']->id,
                 'name' => $this->ee['folder3']->name,
+                'folder_count' => 1,
+                'password_count' => 1,
             ]);
     }
 
@@ -59,8 +83,11 @@ class FolderControllerTest extends FunctionalTestCase
         $this->ee['user'] = factory(\Lockd\Models\User::class)->create();
         $this->ee['group'] = factory(\Lockd\Models\Group::class)->create();
 
-        $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['rootFolder'] = factory(\Lockd\Models\Folder::class)->create();
+        $this->ee['folder1'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['rootFolder']->id,]);
         $this->ee['folder2'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['folder1']->id]);
+
+        $this->ee['folder3'] = factory(\Lockd\Models\Folder::class)->create(['parent_id' => $this->ee['folder1']->id]);
 
         $this->ee['group']->users()->attach($this->ee['user']);
         $this->ee['group']->folders()->attach($this->ee['folder1']);
@@ -74,6 +101,8 @@ class FolderControllerTest extends FunctionalTestCase
             ->seeJson([
                 'id' => $this->ee['folder1']->id,
                 'name' => $this->ee['folder1']->name,
+                'folder_count' => 2,
+                'password_count' => 0,
             ]);
     }
 
