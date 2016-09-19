@@ -28,6 +28,19 @@ body {
     text-align: center;
     color: inherit; }
 
+.fade-transition {
+  opacity: 1;
+  transition: all 400ms ease; }
+
+/* .expand-enter defines the starting state for entering */
+/* .expand-leave defines the ending state for leaving */
+.fade-enter {
+  opacity: 0; }
+
+.fade-leave {
+  opacity: 0;
+  transition: none; }
+
 body {
   padding-left: 250px; }
   body * {
@@ -43,6 +56,15 @@ main hr {
   height: 100%; }
   .ui.card.fluid.link .header {
     font-size: 14px; }
+
+.lockd.controls .ui.input {
+  width: 100%; }
+
+.ui.divided.list .item .content {
+  width: 100%; }
+
+.ui.divided.list .password.details {
+  margin-top: 15px; }
 
 #password_copy_container {
   display: none; }

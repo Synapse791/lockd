@@ -2,36 +2,53 @@ let Passwords = Vue.extend({
     template: `<section class="password screen">
                     <article class="ui message">
                         <div class="ui big breadcrumb">
-                            <a class="section" v-on:click="openBreadcrumbFolder('root')">Root</a>
+                            <a class="section" @click="openBreadcrumbFolder('root')">Root</a>
                             <span v-for="folder in breadcrumb">
                                 <i class="right chevron icon divider"></i>
-                                <a class="section" v-on:click="openBreadcrumbFolder(folder)">{{ folder.name }}</a>
+                                <a class="section" @click="openBreadcrumbFolder(folder)">{{ folder.name }}</a>
                             </span>
                         </div>
                     </article>
-                    
-                    <article class="ui grid">
-                        <div class="three wide computer four wide tablet column" v-for="folder in folders">
-                            <div class="ui fluid link card" v-on:click="openFolder(folder)">
-                                <div class="image">
-                                    <img src="/images/folder.png" alt="Folder">
-                                </div>
-                                <div class="center aligned content">
-                                    <div class="header">{{ folder.name }}</div>
-                                </div>
+                    <article class="ui grid lockd controls">
+                        <div class="ten wide column">
+                            <div class="ui input">
+                                <input type="text" placeholder="Filter" v-model="filter">
+                            </div>
+                        </div>
+                        <div class="six wide column">
+                            <div class="ui two basic icon buttons">
+                                <button class="ui button" :class="{'active': layout == 'grid'}" @click="setLayout('grid')">
+                                    <i class="block layout icon"></i>
+                                    Grid
+                                </button>
+                                <button class="ui button" :class="{'active': layout == 'list'}" @click="setLayout('list')">
+                                    <i class="list layout icon"></i>
+                                    List
+                                </button>
                             </div>
                         </div>
                     </article>
 
-                    <div v-if="passwords.length > 0">
-                        <hr>
-                        <h2>Passwords</h2>
-                        <article class="ui grid">
-                            <div class="four wide computer sixteen wide tablet column" v-for="password in passwords">
+                    <article v-if="layout == 'grid'">
+
+                        <div class="ui grid">
+                            <div class="three wide computer four wide tablet column" v-for="folder in folders | filterBy filter in 'name'">
+                                <div class="ui fluid link card" @click="openFolder(folder)">
+                                    <div class="image">
+                                        <img src="/images/folder.png" alt="Folder">
+                                    </div>
+                                    <div class="center aligned content">
+                                        <div class="header">{{ folder.name }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ui grid" v-if="passwords.length > 0">
+                            <div class="four wide computer sixteen wide tablet column" v-for="password in passwords | filterBy filter in 'name'">
                                 <div class="ui fluid card">
                                     <div class="content">
                                         <div class="header">{{ password.name }}</div>
-                                        <hr>
                                         <table class="ui table">
                                             <tbody>
                                             <tr>
@@ -50,19 +67,75 @@ let Passwords = Vue.extend({
                                         </table>
                                     </div>
                                     <div class="ui two bottom attached buttons">
-                                        <button class="ui blue labeled icon button" v-on:click="showPassword(password.id)">
+                                        <button class="ui blue labeled icon button" @click="showPassword(password.id)">
                                             <i class="search icon"></i>
                                             Show Password
                                         </button>
-                                        <button class="ui primary labeled icon button" v-on:click="copyPassword(password.id)">
+                                        <button class="ui primary labeled icon button" @click="copyPassword(password.id)">
                                             <i class="copy icon"></i>
                                             Copy Password
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                        </article>
-                    </div>
+                        </div>
+
+                    </article>
+
+                    <article v-if="layout == 'list'" class="ui segment">
+                        <div class="ui relaxed divided list">
+                            <div class="item" v-for="folder in folders" @click="openFolder(folder)">
+                                <i class="large folder middle aligned icon"></i>
+                                <div class="content">
+                                    <a class="header">{{ folder.name }}</a>
+                                    <div class="description">
+                                        Contains {{ folder.folder_count || '???' }} folders and {{ folder.password_count || '???' }} passwords
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item" v-for="password in passwords" @click="showPasswordDetails(password)">
+                                <i class="large key middle aligned icon"></i>
+                                <div class="content">
+                                    <a class="header">{{ password.name }}</a>
+                                    <div class="description">User: {{ password.user || 'no user' }}</div>
+
+                                    <div class="details" v-if="password.id == activePassword.id" transition="fade">
+                                        <div class="ui attached segment">
+                                            <table class="ui table">
+                                                <tbody>
+                                                <tr>
+                                                    <td>User</td>
+                                                    <td>{{ password.user }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>URL</td>
+                                                    <td><a href="{{ password.url }}">{{ password.url }}</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Password</td>
+                                                    <td><span id="password_{{ password.id }}">&ast;&ast;&ast;&ast;&ast;&ast;</span></td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="ui two bottom attached buttons">
+                                            <button class="ui blue labeled icon button" @click="showPassword(password.id)">
+                                                <i class="search icon"></i>
+                                                Show Password
+                                            </button>
+                                            <button class="ui primary labeled icon button" @click="copyPassword(password.id)">
+                                                <i class="copy icon"></i>
+                                                Copy Password
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+
                     <div id="password_copy_container">
                         <button id="copy_trigger" data-clipboard-text="{{ hiddenPassword }}"></button>
                     </div>
@@ -70,6 +143,9 @@ let Passwords = Vue.extend({
 
     data() {
         return {
+            activePassword: {},
+            layout: 'grid',
+            filter: '',
             hiddenPassword: '',
             breadcrumb: [],
             folders: [],
@@ -83,6 +159,10 @@ let Passwords = Vue.extend({
     },
 
     methods: {
+
+        setLayout(layout) {
+            this.layout = layout;
+        },
 
         openFolder(folder) {
             this.loadContents(folder.id);
@@ -100,6 +180,10 @@ let Passwords = Vue.extend({
                 }
                 this.loadContents(folder.id);
             }
+        },
+
+        showPasswordDetails(password) {
+            this.activePassword = password;
         },
 
         loadContents(folderId) {

@@ -1,0 +1,14 @@
+.fade-transition {
+  opacity: 1;
+  transition: all 400ms ease;
+}
+/* .expand-enter defines the starting state for entering */
+/* .expand-leave defines the ending state for leaving */
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-leave {
+  opacity: 0;
+  transition: none;
+}

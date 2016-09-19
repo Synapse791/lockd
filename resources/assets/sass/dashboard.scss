@@ -2,6 +2,7 @@
 @import "partials/semantic-override";
 @import "partials/global";
 @import "partials/sidebar";
+@import "partials/transitions";
 
 body {
   padding-left: 250px;
@@ -27,6 +28,15 @@ main hr {
       font-size: 14px;
     }
   }
+}
+
+.lockd.controls {
+  .ui.input { width: 100%; }
+}
+
+.ui.divided.list {
+  .item .content { width: 100%; }
+  .password.details { margin-top: 15px; }
 }
 
 #password_copy_container {
