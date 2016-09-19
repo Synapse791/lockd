@@ -15,8 +15,18 @@ main {
   padding: 25px 50px;
 }
 
+main hr {
+  margin-top: 15px;
+}
+
 .ui.card {
   height: 100%;
+
+  &.fluid.link {
+    .header {
+      font-size: 14px;
+    }
+  }
 }
 
 #password_copy_container {
