@@ -61,10 +61,11 @@ main hr {
   width: 100%; }
 
 .ui.divided.list .item .content {
-  width: 100%; }
+  width: 100%;
+  cursor: pointer; }
 
-.ui.divided.list .password.details {
-  margin-top: 15px; }
+.ui.divided.list .details {
+  margin: 15px 0; }
 
 #password_copy_container {
   display: none; }

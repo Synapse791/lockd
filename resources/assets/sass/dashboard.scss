@@ -35,8 +35,11 @@ main hr {
 }
 
 .ui.divided.list {
-  .item .content { width: 100%; }
-  .password.details { margin-top: 15px; }
+  .item .content {
+    width: 100%;
+    cursor: pointer;
+  }
+  .details { margin: 15px 0; }
 }
 
 #password_copy_container {
