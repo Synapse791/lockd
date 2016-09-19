@@ -89,7 +89,7 @@ let Passwords = Vue.extend({
                                 <div class="content">
                                     <a class="header">{{ folder.name }}</a>
                                     <div class="description">
-                                        Contains {{ folder.folder_count || '???' }} folders and {{ folder.password_count || '???' }} passwords
+                                        Contains {{ typeof folder.folder_count === 'undefined' ? '???' : folder.folder_count }} folders and {{ typeof folder.password_count === 'undefined' ? '???' : folder.password_count }} passwords
                                     </div>
                                 </div>
                             </div>
