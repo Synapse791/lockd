@@ -2,52 +2,52 @@ let Passwords = Vue.extend({
     template: `<section class="password screen">
                     <article class="ui message">
                         <div class="ui big breadcrumb">
-                            <a class="section">Root</a>
-                            <span v-for="crumb in breadcrumb">
+                            <a class="section" v-on:click="openBreadcrumbFolder('root')">Root</a>
+                            <span v-for="folder in breadcrumb">
                                 <i class="right chevron icon divider"></i>
-                                <a class="section" v-on:click="loadContents(crumb.id)">{{ crumb.name }}</a>
+                                <a class="section" v-on:click="openBreadcrumbFolder(folder)">{{ folder.name }}</a>
                             </span>
                         </div>
                     </article>
                     <div class="ui grid">
                         <div class="three wide computer eight wide tablet column" v-for="folder in folders">
-                            <div class="ui fluid link card">
+                            <div class="ui fluid link card" v-on:click="openFolder(folder)">
                                 <div class="image">
                                     <img src="/images/folder.png" alt="Folder">
                                 </div>
                                 <div class="center aligned content">
-                                    <div class="header">{{ item.name }}</div>
+                                    <div class="header">{{ folder.name }}</div>
                                 </div>
                             </div>
                         </div>
                         <div class="three wide computer eight wide tablet column" v-for="password in passwords">
                             <div class="ui fluid card">
                                 <div class="content">
-                                    <div class="header">{{ item.name }}</div>
+                                    <div class="header">{{ password.name }}</div>
                                     <hr>
                                     <table class="ui table">
                                         <tbody>
                                         <tr>
                                             <td><strong>URL</strong></td>
-                                            <td><a href="{{ item.url || '' }}">{{ item.url || 'none' }}</a></td>
+                                            <td><a href="{{ password.url || '' }}">{{ password.url || 'none' }}</a></td>
                                         </tr>
                                         <tr>
                                             <td><strong>User</strong></td>
-                                            <td>{{ item.user || 'none' }}</td>
+                                            <td>{{ password.user || 'none' }}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Password</strong></td>
-                                            <td><span id="password_{{ item.id }}">&ast;&ast;&ast;&ast;&ast;&ast;</span></td>
+                                            <td><span id="password_{{ password.id }}">&ast;&ast;&ast;&ast;&ast;&ast;</span></td>
                                         </tr>
                                         </tbody>
                                     </table>
                                 </div>
                                 <div class="ui two bottom attached buttons">
-                                    <button class="ui blue labeled icon button" v-on:click="showPassword(item.id)">
+                                    <button class="ui blue labeled icon button" v-on:click="showPassword(password.id)">
                                         <i class="search icon"></i>
                                         Show Password
                                     </button>
-                                    <button class="ui primary labeled icon button" v-on:click="copyPassword(item.id)">
+                                    <button class="ui primary labeled icon button" v-on:click="copyPassword(password.id)">
                                         <i class="copy icon"></i>
                                         Copy Password
                                     </button>
@@ -63,19 +63,36 @@ let Passwords = Vue.extend({
     data() {
         return {
             hiddenPassword: '',
+            breadcrumb: [],
             folders: [],
             passwords: []
         }
     },
 
     ready() {
-        setTimeout(() => {
-            new Clipboard('#copy_trigger');
-            this.loadContents(1);
-        }, 1000);
+        this.loadContents(1);
+        setTimeout(() => new Clipboard('#copy_trigger'), 500);
     },
 
     methods: {
+
+        openFolder(folder) {
+            this.loadContents(folder.id);
+            this.breadcrumb.push(folder);
+        },
+
+        openBreadcrumbFolder(folder) {
+            if (folder === 'root') {
+                this.breadcrumb = [];
+                this.loadContents(1);
+            } else {
+                if (this.breadcrumb[this.breadcrumb.length - 1] != folder) {
+                    let position = this.breadcrumb.indexOf(folder);
+                    this.breadcrumb.splice(position + 1);
+                }
+                this.loadContents(folder.id);
+            }
+        },
 
         loadContents(folderId) {
             this.loadFolders(folderId);
@@ -83,6 +100,7 @@ let Passwords = Vue.extend({
         },
 
         loadFolders(folderId) {
+            this.folders = [];
             $q.get(`/api/folder/${folderId}/folders`)
                 .success(({data}) => {
                     this.folders = data;
@@ -90,6 +108,7 @@ let Passwords = Vue.extend({
         },
 
         loadPasswords(folderId) {
+            this.passwords = [];
             $q.get(`/api/folder/${folderId}/passwords`)
                 .success(({data}) => {
                     this.passwords = data;
@@ -99,8 +118,8 @@ let Passwords = Vue.extend({
         showPassword(id) {
             let el = $(`#password_${id}`);
             let password = '';
-            this.items.forEach((item) => {
-                if (item.type == 'password' && item.id == id)
+            this.passwords.forEach((item) => {
+                if (item.id == id)
                     password = item.password;
             });
 
@@ -111,8 +130,8 @@ let Passwords = Vue.extend({
 
         copyPassword(id) {
             let password = '';
-            this.items.forEach((item) => {
-                if (item.type == 'password' && item.id == id)
+            this.passwords.forEach((item) => {
+                if (item.id == id)
                     password = item.password;
             });
 
